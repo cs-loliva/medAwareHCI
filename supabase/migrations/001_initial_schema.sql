@@ -1,12 +1,9 @@
 -- MedAware Initial Schema Migration
 -- Academic prototype only. Medication interaction logic is mock/demo only.
-
 create extension if not exists "pgcrypto";
 
--- =========================================================
--- Utility Functions
--- =========================================================
 
+-- Utility Functions
 create or replace function public.set_updated_at()
 returns trigger as $$
 begin
@@ -24,9 +21,7 @@ returns text[] as $$
   where ur.user_id = auth.uid();
 $$ language sql security definer stable;
 
--- =========================================================
 -- 1. Profiles
--- =========================================================
 
 create table public.profiles (
   id uuid primary key references auth.users(id) on delete cascade,
@@ -64,9 +59,7 @@ create trigger profiles_set_updated_at
 before update on public.profiles
 for each row execute function public.set_updated_at();
 
--- =========================================================
 -- 2. Roles
--- =========================================================
 
 create table public.roles (
   id uuid primary key default gen_random_uuid(),
@@ -74,9 +67,7 @@ create table public.roles (
     check (name in ('civilian', 'caregiver', 'nurse', 'doctor', 'pharmacist', 'admin'))
 );
 
--- =========================================================
 -- 3. User Roles
--- =========================================================
 
 create table public.user_roles (
   id uuid primary key default gen_random_uuid(),
@@ -87,9 +78,7 @@ create table public.user_roles (
   unique (user_id, role_id)
 );
 
--- =========================================================
 -- 4. Civilian Medications
--- =========================================================
 
 create table public.medications (
   id uuid primary key default gen_random_uuid(),
@@ -112,9 +101,7 @@ create trigger medications_set_updated_at
 before update on public.medications
 for each row execute function public.set_updated_at();
 
--- =========================================================
 -- 5. Medication Schedules
--- =========================================================
 
 create table public.medication_schedules (
   id uuid primary key default gen_random_uuid(),
@@ -128,9 +115,7 @@ create table public.medication_schedules (
   )
 );
 
--- =========================================================
 -- 6. Medication Logs
--- =========================================================
 
 create table public.medication_logs (
   id uuid primary key default gen_random_uuid(),
@@ -146,9 +131,7 @@ create table public.medication_logs (
   created_at timestamptz not null default now()
 );
 
--- =========================================================
 -- 7. Medication Alerts
--- =========================================================
 
 create table public.medication_alerts (
   id uuid primary key default gen_random_uuid(),
@@ -166,9 +149,7 @@ create table public.medication_alerts (
   check (medication_id_a <> medication_id_b)
 );
 
--- =========================================================
 -- 8. Interaction Rules
--- =========================================================
 
 create table public.interaction_rules (
   id uuid primary key default gen_random_uuid(),
@@ -181,9 +162,9 @@ create table public.interaction_rules (
   created_at timestamptz not null default now()
 );
 
--- =========================================================
+
 -- 9. Interaction Checks
--- =========================================================
+
 
 create table public.interaction_checks (
   id uuid primary key default gen_random_uuid(),
@@ -197,9 +178,7 @@ create table public.interaction_checks (
   created_at timestamptz not null default now()
 );
 
--- =========================================================
 -- 10. Care Circle Members
--- =========================================================
 
 create table public.care_circle_members (
   id uuid primary key default gen_random_uuid(),
@@ -215,9 +194,7 @@ create table public.care_circle_members (
   check (owner_id <> caregiver_id)
 );
 
--- =========================================================
 -- 11. Patients
--- =========================================================
 
 create table public.patients (
   id uuid primary key default gen_random_uuid(),
@@ -240,9 +217,7 @@ create trigger patients_set_updated_at
 before update on public.patients
 for each row execute function public.set_updated_at();
 
--- =========================================================
 -- 12. Patient Assignments
--- =========================================================
 
 create table public.patient_assignments (
   id uuid primary key default gen_random_uuid(),
@@ -253,9 +228,7 @@ create table public.patient_assignments (
   unique (patient_id, user_id)
 );
 
--- =========================================================
 -- 13. Patient Medications
--- =========================================================
 
 create table public.patient_medications (
   id uuid primary key default gen_random_uuid(),
@@ -280,9 +253,7 @@ create trigger patient_medications_set_updated_at
 before update on public.patient_medications
 for each row execute function public.set_updated_at();
 
--- =========================================================
 -- 14. Patient Medication Schedules
--- =========================================================
 
 create table public.patient_medication_schedules (
   id uuid primary key default gen_random_uuid(),
@@ -296,9 +267,7 @@ create table public.patient_medication_schedules (
   )
 );
 
--- =========================================================
 -- 15. Patient Medication Administrations
--- =========================================================
 
 create table public.patient_medication_administrations (
   id uuid primary key default gen_random_uuid(),
@@ -317,9 +286,7 @@ create table public.patient_medication_administrations (
   created_at timestamptz not null default now()
 );
 
--- =========================================================
 -- 16. Clinical Alerts
--- =========================================================
 
 create table public.clinical_alerts (
   id uuid primary key default gen_random_uuid(),
@@ -337,9 +304,7 @@ create table public.clinical_alerts (
   check (patient_medication_id_a <> patient_medication_id_b)
 );
 
--- =========================================================
 -- 17. Care Notes
--- =========================================================
 
 create table public.care_notes (
   id uuid primary key default gen_random_uuid(),
@@ -353,9 +318,7 @@ create table public.care_notes (
   created_at timestamptz not null default now()
 );
 
--- =========================================================
 -- 18. Clinical Reviews
--- =========================================================
 
 create table public.clinical_reviews (
   id uuid primary key default gen_random_uuid(),
@@ -376,9 +339,7 @@ create unique index clinical_reviews_one_pending_per_medication
 on public.clinical_reviews(patient_medication_id)
 where status = 'pending';
 
--- =========================================================
 -- 19. Audit Logs
--- =========================================================
 
 create table public.audit_logs (
   id uuid primary key default gen_random_uuid(),
@@ -390,9 +351,7 @@ create table public.audit_logs (
   created_at timestamptz not null default now()
 );
 
--- =========================================================
 -- 20. Notifications
--- =========================================================
 
 create table public.notifications (
   id uuid primary key default gen_random_uuid(),
@@ -407,9 +366,7 @@ create table public.notifications (
   read_at timestamptz
 );
 
--- =========================================================
 -- 21. Notification Preferences
--- =========================================================
 
 create table public.notification_preferences (
   id uuid primary key default gen_random_uuid(),
@@ -427,9 +384,7 @@ create trigger notification_preferences_set_updated_at
 before update on public.notification_preferences
 for each row execute function public.set_updated_at();
 
--- =========================================================
 -- 22. Outpatient Appointments
--- =========================================================
 
 create table public.outpatient_appointments (
   id uuid primary key default gen_random_uuid(),
@@ -446,9 +401,7 @@ create trigger outpatient_appointments_set_updated_at
 before update on public.outpatient_appointments
 for each row execute function public.set_updated_at();
 
--- =========================================================
 -- Indexes
--- =========================================================
 
 create index idx_user_roles_user_id on public.user_roles(user_id);
 create index idx_medications_user_id on public.medications(user_id);
