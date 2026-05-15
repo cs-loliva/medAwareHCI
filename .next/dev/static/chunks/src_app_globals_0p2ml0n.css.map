@@ -1,6 +1,0 @@
-{
-  "version": 3,
-  "sources": [],
-  "sections": [
-    {"offset": {"line": 1, "column": 0}, "map": {"version":3,"sources":["file:///C:/Users/xavvy/OneDrive/Desktop/medAwareHCI/src/app/globals.css"],"sourcesContent":["@import \"tailwindcss\";\r\n\r\n* {\r\n  box-sizing: border-box;\r\n}\r\n\r\nhtml,\r\nbody {\r\n  margin: 0;\r\n  min-height: 100%;\r\n}\r\n\r\nbody {\r\n  font-family: Arial, Helvetica, sans-serif;\r\n}"],"names":[],"mappings":"AAEA;;;;AAIA;;;;;AAMA"}}]
-}
