@@ -12,15 +12,6 @@ begin
 end;
 $$ language plpgsql;
 
--- Returns the role names for the current authenticated user.
-create or replace function public.current_user_roles()
-returns text[] as $$
-  select coalesce(array_agg(r.name), '{}')
-  from public.user_roles ur
-  join public.roles r on r.id = ur.role_id
-  where ur.user_id = auth.uid();
-$$ language sql security definer stable;
-
 -- 1. Profiles
 
 create table public.profiles (
