@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 export default function Home() {
   return (
     <main className="min-h-screen bg-[#F6F8FB] text-[#101828]">
@@ -16,6 +18,22 @@ export default function Home() {
           MedAware is a medication adherence and safety-awareness platform for
           patients, caregivers, clinics, and hospital teams.
         </p>
+
+        <div className="mt-10 flex flex-col gap-3 sm:flex-row">
+          <Link
+            href="/login"
+            className="rounded-2xl bg-[#FF3F4D] px-6 py-3 text-sm font-black text-white shadow-lg"
+          >
+            Sign in
+          </Link>
+
+          <Link
+            href="/role-select"
+            className="rounded-2xl bg-white px-6 py-3 text-sm font-black text-[#FF3F4D] shadow-sm"
+          >
+            Prototype role select
+          </Link>
+        </div>
 
         <div className="mt-10 rounded-3xl border border-[#E6EAF0] bg-white p-6 text-left shadow-sm">
           <p className="text-sm font-semibold text-[#FF3F4D]">
