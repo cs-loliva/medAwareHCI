@@ -36,7 +36,14 @@ async function findUserByEmail(email: string) {
     throw error;
   }
 
-  return data.users.find((user) => user.email === email);
+  const users = (data.users ?? []) as Array<{
+    id: string;
+    email?: string;
+  }>;
+
+  return users.find(
+    (user) => user.email?.toLowerCase() === email.toLowerCase()
+  );
 }
 
 async function main() {
