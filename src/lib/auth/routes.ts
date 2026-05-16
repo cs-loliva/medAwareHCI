@@ -40,7 +40,7 @@ export function getRequiredRolesForPath(pathname: string): Role[] {
   }
 
   if (pathname.startsWith("/clinical/discharge")) {
-    return ["doctor", "admin"];
+    return ["doctor", "nurse", "admin"];
   }
 
   if (pathname.startsWith("/admin")) {

@@ -347,6 +347,13 @@ export default async function PatientMedicationTrackerPage({
   </Link>
 
   <Link
+  href={`/clinical/discharge/${patient.id}`}
+  className="rounded-2xl bg-[#12B76A] px-5 py-3 text-sm font-black text-white"
+>
+  Discharge instructions
+</Link>
+
+  <Link
     href="/clinical/patients"
     className="rounded-2xl bg-[#101828] px-5 py-3 text-sm font-black text-white"
   >

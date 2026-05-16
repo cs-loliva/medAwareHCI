@@ -8,7 +8,7 @@ type TopBarProps = {
 
 export function TopBar({ title, subtitle }: TopBarProps) {
   return (
-    <header className="sticky top-0 z-10 border-b border-[#E6EAF0] bg-[#F6F8FB]/90 px-6 py-5 backdrop-blur">
+    <header className="sticky top-0 z-10 border-b border-[#E6EAF0] bg-[#F6F8FB]/90 px-6 py-5 backdrop-blur print:hidden"> 
       <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
         <div>
           <p className="text-xs font-black uppercase tracking-[0.2em] text-[#FF3F4D]">

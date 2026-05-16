@@ -11,6 +11,7 @@ const navItems = [
   { href: "/offline", label: "Offline Sync" },
   { href: "/settings", label: "Settings" },
   { href: "/clinical/patients", label: "Patient Board" },
+  { href: "/clinical/clinic", label: "Clinic Queue" },
   { href: "/clinical/alerts", label: "Alert Center" },
   { href: "/clinical/reviews", label: "Review Queue" },
   { href: "/admin", label: "Admin" },
@@ -19,7 +20,7 @@ const navItems = [
 
 export function Sidebar({ activePath }: SidebarProps) {
   return (
-    <aside className="hidden min-h-screen w-72 border-r border-[#E6EAF0] bg-white px-5 py-6 lg:block">
+    <aside className="hidden min-h-screen w-72 border-r border-[#E6EAF0] bg-white px-5 py-6 lg:block print:hidden">
       <Link href="/" className="flex items-center gap-3">
         <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#FF3F4D] text-lg font-black text-white shadow-sm">
           M+
