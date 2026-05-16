@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
+import { ArchiveMedicationForm } from "@/components/features/civilian/ArchiveMedicationForm";
 
 export const dynamic = "force-dynamic";
 
@@ -422,19 +423,11 @@ export default async function DashboardPage({ searchParams }: PageProps) {
                   {medication.notes ?? "No notes added."}
                 </p>
 
-                <form action={archiveMedication} className="mt-5">
-                  <input
-                    type="hidden"
-                    name="medicationId"
-                    value={medication.id}
-                  />
-                  <button
-                    type="submit"
-                    className="rounded-2xl bg-[#FFE8EC] px-4 py-2 text-sm font-black text-[#FF3F4D]"
-                  >
-                    Remove medication
-                  </button>
-                </form>
+                <ArchiveMedicationForm
+  action={archiveMedication}
+  medicationId={medication.id}
+  medicationName={medication.name}
+/>
               </div>
             ))
           )}
