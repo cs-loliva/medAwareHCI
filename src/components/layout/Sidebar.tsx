@@ -6,6 +6,7 @@ type SidebarProps = {
 
 const navItems = [
   { href: "/dashboard", label: "Civilian Dashboard" },
+  { href: "/adherence", label: "Adherence Risk" },
   { href: "/clinical/patients", label: "Patient Board" },
   { href: "/clinical/reviews", label: "Review Queue" },
   { href: "/admin", label: "Admin" },

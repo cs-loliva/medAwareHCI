@@ -463,3 +463,44 @@ values
     '{"reason":"demo interaction"}'
   )
 on conflict do nothing;
+
+-- Medication Logs
+insert into public.medication_logs
+(medication_id, user_id, scheduled_at, logged_at, status)
+values
+  (
+    '00000000-0000-4000-8000-000000000103',
+    (select id from public.profiles where email = 'civilian@medaware.demo'),
+    now() - interval '1 day',
+    now() - interval '1 day' + interval '5 minutes',
+    'taken'
+  ),
+  (
+    '00000000-0000-4000-8000-000000000103',
+    (select id from public.profiles where email = 'civilian@medaware.demo'),
+    now() - interval '2 days',
+    null,
+    'missed'
+  ),
+  (
+    '00000000-0000-4000-8000-000000000101',
+    (select id from public.profiles where email = 'civilian@medaware.demo'),
+    now() - interval '3 days',
+    now() - interval '3 days' + interval '12 minutes',
+    'taken'
+  ),
+  (
+    '00000000-0000-4000-8000-000000000101',
+    (select id from public.profiles where email = 'civilian@medaware.demo'),
+    now() - interval '4 days',
+    null,
+    'skipped'
+  ),
+  (
+    '00000000-0000-4000-8000-000000000103',
+    (select id from public.profiles where email = 'civilian@medaware.demo'),
+    now() - interval '5 days',
+    now() - interval '5 days' + interval '8 minutes',
+    'taken'
+  )
+on conflict do nothing;
