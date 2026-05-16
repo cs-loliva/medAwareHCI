@@ -12,6 +12,7 @@ const navItems = [
   { href: "/clinical/reviews", label: "Review Queue" },
   { href: "/admin", label: "Admin" },
   { href: "/role-select", label: "Switch Role" },
+  { href: "/offline", label: "Offline Sync" },
 ];
 
 export function Sidebar({ activePath }: SidebarProps) {

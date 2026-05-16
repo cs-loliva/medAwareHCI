@@ -17,6 +17,7 @@ export function getRequiredRolesForPath(pathname: string): Role[] {
     pathname.startsWith("/interactions") ||
     pathname.startsWith("/adherence") ||
     pathname.startsWith("/care-circle") ||
+    pathname.startsWith("/offline") ||
     pathname.startsWith("/settings") ||
     pathname.startsWith("/widgets")
   ) {
