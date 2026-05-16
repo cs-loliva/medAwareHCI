@@ -10,6 +10,7 @@ const navItems = [
   { href: "/care-circle", label: "Care Circle" },
   { href: "/offline", label: "Offline Sync" },
   { href: "/settings", label: "Settings" },
+  { href: "/widgets", label: "Widgets" },
   { href: "/clinical/patients", label: "Patient Board" },
   { href: "/clinical/clinic", label: "Clinic Queue" },
   { href: "/clinical/alerts", label: "Alert Center" },
