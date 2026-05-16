@@ -7,6 +7,7 @@ import { createClient } from "@/lib/supabase/client";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { FormEvent, useEffect, useMemo, useState } from "react";
+import { CenteredDangerModal } from "@/components/features/civilian/CenteredDangerModal";
 
 type ExistingMedication = {
   id: string;
@@ -119,6 +120,8 @@ export default function AddMedicationPage() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [allowCriticalDemoSave, setAllowCriticalDemoSave] = useState(false);
+  const [showDangerModal, setShowDangerModal] = useState(false);
+  const [contactGuidanceViewed, setContactGuidanceViewed] = useState(false);
 
   useEffect(() => {
     async function loadExistingMedications() {
@@ -190,16 +193,20 @@ export default function AddMedicationPage() {
   }
 
   function goToSafetyReview() {
-    const validationError = validateStepTwo();
+  const validationError = validateStepTwo();
 
-    if (validationError) {
-      setErrorMessage(validationError);
-      return;
-    }
-
-    setErrorMessage(null);
-    setStep(3);
+  if (validationError) {
+    setErrorMessage(validationError);
+    return;
   }
+
+  setErrorMessage(null);
+  setStep(3);
+
+  if (highestSeverity === "critical") {
+    setShowDangerModal(true);
+  }
+}
 
   async function handleSave(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -280,7 +287,42 @@ export default function AddMedicationPage() {
     router.refresh();
   }
 
+  function clearPendingMedication() {
+  setName("");
+  setDoseAmount("");
+  setDoseUnit("mg");
+  setFrequency("Daily");
+  setScheduledTime("08:00");
+  setStartDate(new Date().toISOString().slice(0, 10));
+  setEndDate("");
+  setNotes("");
+  setAllowCriticalDemoSave(false);
+  setShowDangerModal(false);
+  setContactGuidanceViewed(false);
+  setStep(1);
+  router.push("/dashboard");
+}
+
+function viewCriticalDetails() {
+  setShowDangerModal(false);
+  setStep(3);
+}
+  
   return (
+  <>
+    {showDangerModal && highestSeverity === "critical" ? (
+      <CenteredDangerModal
+        medicationName={name || "the newly added medication"}
+        conflictSummary={
+          findings.find((finding) => finding.severity === "critical")
+            ?.description ?? "A critical demo medication conflict was detected."
+        }
+        onContactProfessional={() => setContactGuidanceViewed(true)}
+        onRemoveMedication={clearPendingMedication}
+        onViewDetails={viewCriticalDetails}
+      />
+    ) : null}
+
     <AppShell
       title="Guided Add Medication"
       subtitle="Add medication details, schedule, and review demo safety checks before saving."
@@ -490,27 +532,42 @@ export default function AddMedicationPage() {
               </div>
 
               {highestSeverity === "critical" ? (
-                <label className="mt-6 flex gap-3 rounded-3xl bg-[#FFF6F7] p-5">
-                  <input
-                    type="checkbox"
-                    checked={allowCriticalDemoSave}
-                    onChange={(event) =>
-                      setAllowCriticalDemoSave(event.target.checked)
-                    }
-                    className="mt-1 h-5 w-5"
-                  />
-                  <span>
-                    <span className="block text-sm font-black text-[#FF3F4D]">
-                      Save as pending review
-                    </span>
-                    <span className="mt-1 block text-sm leading-6 text-[#667085]">
-                      I understand this is demo-only logic. In a real app, a
-                      critical alert should prompt professional review before
-                      continuing.
-                    </span>
-                  </span>
-                </label>
-              ) : null}
+  <>
+    <label className="mt-6 flex gap-3 rounded-3xl bg-[#FFF6F7] p-5">
+      <input
+        type="checkbox"
+        checked={allowCriticalDemoSave}
+        onChange={(event) =>
+          setAllowCriticalDemoSave(event.target.checked)
+        }
+        className="mt-1 h-5 w-5"
+      />
+      <span>
+        <span className="block text-sm font-black text-[#FF3F4D]">
+          Save as pending review
+        </span>
+        <span className="mt-1 block text-sm leading-6 text-[#667085]">
+          I understand this is demo-only logic. In a real app, a
+          critical alert should prompt professional review before
+          continuing. This medication will be saved as pending review,
+          not active.
+        </span>
+      </span>
+    </label>
+
+    {contactGuidanceViewed ? (
+      <div className="mt-4 rounded-3xl border border-[#E6EAF0] bg-[#F6F8FB] p-5">
+        <p className="text-sm font-black text-[#101828]">
+          Contact guidance viewed
+        </p>
+        <p className="mt-2 text-sm leading-6 text-[#667085]">
+          In this prototype, this indicates the user has been prompted to contact a
+          health professional before continuing.
+        </p>
+      </div>
+    ) : null}
+  </>
+) : null}
 
               <div className="mt-8 flex flex-wrap justify-between gap-3">
                 <button
@@ -613,6 +670,7 @@ export default function AddMedicationPage() {
           </Card>
         </aside>
       </form>
-    </AppShell>
+        </AppShell>
+  </>
   );
 }
