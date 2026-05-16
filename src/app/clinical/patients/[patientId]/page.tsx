@@ -338,12 +338,21 @@ export default async function PatientMedicationTrackerPage({
             </p>
           </div>
 
-          <Link
-            href="/clinical/patients"
-            className="rounded-2xl bg-[#101828] px-5 py-3 text-sm font-black text-white"
-          >
-            Back to board
-          </Link>
+          <div className="flex flex-wrap gap-3">
+  <Link
+    href={`/clinical/patients/${patient.id}/notes`}
+    className="rounded-2xl bg-[#FF3F4D] px-5 py-3 text-sm font-black text-white"
+  >
+    Care notes
+  </Link>
+
+  <Link
+    href="/clinical/patients"
+    className="rounded-2xl bg-[#101828] px-5 py-3 text-sm font-black text-white"
+  >
+    Back to board
+  </Link>
+</div>
         </div>
 
         <div className="mt-6 space-y-4">
