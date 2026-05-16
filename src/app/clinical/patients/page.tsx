@@ -240,86 +240,93 @@ export default async function PatientBoardPage() {
         </div>
 
         <div className="mt-6 space-y-4">
-          {patients.length === 0 ? (
-            <div className="rounded-3xl bg-[#F6F8FB] p-5 text-sm text-[#667085]">
-              No patients found.
+  {patients.length === 0 ? (
+    <div className="rounded-3xl bg-[#F6F8FB] p-5 text-sm text-[#667085]">
+      No patients found.
+    </div>
+  ) : (
+    patients.map((patient) => {
+      const risk = getRiskState(patient.id, alerts);
+      const patientAlerts = alerts.filter(
+        (alert) => alert.patient_id === patient.id
+      );
+      const nextAction = getNextMedicationAction(
+        patient.id,
+        medications,
+        schedules
+      );
+
+      return (
+        <div
+          key={patient.id}
+          className="rounded-[2rem] border border-[#E6EAF0] bg-[#F6F8FB] p-5"
+        >
+          <div className="flex flex-col gap-5 xl:flex-row xl:items-center xl:justify-between">
+            <div>
+              <div className="flex flex-wrap items-center gap-3">
+                <h3 className="text-2xl font-black">
+                  {patient.full_name}
+                </h3>
+
+                <Badge variant={getRiskVariant(risk)}>{risk}</Badge>
+
+                <Badge variant="default">{patient.status}</Badge>
+              </div>
+
+              <p className="mt-2 text-sm leading-6 text-[#667085]">
+                Room {patient.room_number ?? "N/A"} •{" "}
+                {patient.ward ?? "No ward"} •{" "}
+                {patient.primary_diagnosis ?? "No diagnosis listed"}
+              </p>
+
+              {patient.allergies.length > 0 ? (
+                <p className="mt-2 text-sm font-bold text-[#FF3F4D]">
+                  Allergies: {patient.allergies.join(", ")}
+                </p>
+              ) : null}
             </div>
-          ) : (
-            patients.map((patient) => {
-              const risk = getRiskState(patient.id, alerts);
-              const patientAlerts = alerts.filter(
-                (alert) => alert.patient_id === patient.id
-              );
-              const nextAction = getNextMedicationAction(
-                patient.id,
-                medications,
-                schedules
-              );
 
-              return (
-                <div
-                  key={patient.id}
-                  className="rounded-[2rem] border border-[#E6EAF0] bg-[#F6F8FB] p-5"
-                >
-                  <div className="flex flex-col gap-5 xl:flex-row xl:items-center xl:justify-between">
-                    <div>
-                      <div className="flex flex-wrap items-center gap-3">
-                        <h3 className="text-2xl font-black">
-                          {patient.full_name}
-                        </h3>
+            <div className="rounded-3xl bg-white p-5 xl:w-96">
+              <p className="text-xs font-black uppercase tracking-wide text-[#667085]">
+                Next medication action
+              </p>
+              <p className="mt-2 text-sm font-bold text-[#101828]">
+                {nextAction}
+              </p>
 
-                        <Badge variant={getRiskVariant(risk)}>{risk}</Badge>
+              <Link
+                href={`/clinical/patients/${patient.id}`}
+                className="mt-4 inline-block rounded-2xl bg-[#FF3F4D] px-4 py-2 text-sm font-black text-white"
+              >
+                Open tracker
+              </Link>
+            </div>
+          </div>
 
-                        <Badge variant="default">{patient.status}</Badge>
-                      </div>
-
-                      <p className="mt-2 text-sm leading-6 text-[#667085]">
-                        Room {patient.room_number ?? "N/A"} •{" "}
-                        {patient.ward ?? "No ward"} •{" "}
-                        {patient.primary_diagnosis ?? "No diagnosis listed"}
-                      </p>
-
-                      {patient.allergies.length > 0 ? (
-                        <p className="mt-2 text-sm font-bold text-[#FF3F4D]">
-                          Allergies: {patient.allergies.join(", ")}
-                        </p>
-                      ) : null}
-                    </div>
-
-                    <div className="rounded-3xl bg-white p-5 xl:w-96">
-                      <p className="text-xs font-black uppercase tracking-wide text-[#667085]">
-                        Next medication action
-                      </p>
-                      <p className="mt-2 text-sm font-bold text-[#101828]">
-                        {nextAction}
-                      </p>
-                    </div>
+          {patientAlerts.length > 0 ? (
+            <div className="mt-5 rounded-3xl bg-[#FFF6F7] p-5">
+              <p className="text-sm font-black text-[#FF3F4D]">
+                Active alerts
+              </p>
+              <div className="mt-3 space-y-3">
+                {patientAlerts.map((alert) => (
+                  <div key={alert.id}>
+                    <Badge variant={getRiskVariant(risk)}>
+                      {alert.severity}
+                    </Badge>
+                    <p className="mt-2 text-sm leading-6 text-[#667085]">
+                      {alert.description}
+                    </p>
                   </div>
-
-                  {patientAlerts.length > 0 ? (
-                    <div className="mt-5 rounded-3xl bg-[#FFF6F7] p-5">
-                      <p className="text-sm font-black text-[#FF3F4D]">
-                        Active alerts
-                      </p>
-                      <div className="mt-3 space-y-3">
-                        {patientAlerts.map((alert) => (
-                          <div key={alert.id}>
-                            <Badge variant={getRiskVariant(risk)}>
-                              {alert.severity}
-                            </Badge>
-                            <p className="mt-2 text-sm leading-6 text-[#667085]">
-                              {alert.description}
-                            </p>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  ) : null}
-                </div>
-              );
-            })
-          )}
+                ))}
+              </div>
+            </div>
+          ) : null}
         </div>
+      );
+    })
+  )}
+</div>
       </Card>
 
       <Card className="mt-5">
