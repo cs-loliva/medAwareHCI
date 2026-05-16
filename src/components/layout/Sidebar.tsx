@@ -15,6 +15,7 @@ const navItems = [
   { href: "/clinical/alerts", label: "Alert Center" },
   { href: "/clinical/reviews", label: "Review Queue" },
   { href: "/admin", label: "Admin" },
+  { href: "/admin/system", label: "System Overview" },
   { href: "/role-select", label: "Switch Role" },
 ];
 
