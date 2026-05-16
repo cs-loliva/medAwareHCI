@@ -389,6 +389,14 @@ export default async function ClinicalAlertsPage({ searchParams }: PageProps) {
                         This alert has already been acknowledged.
                       </div>
                     )}
+                    {alert.severity === "critical" ? (
+  <Link
+    href={`/clinical/alerts/${alert.id}`}
+    className="mt-3 block w-full rounded-2xl bg-[#FF3F4D] px-4 py-3 text-center text-sm font-black text-white"
+  >
+    Open danger alert
+  </Link>
+) : null}
 
                     <Link
                       href="/clinical/patients"
