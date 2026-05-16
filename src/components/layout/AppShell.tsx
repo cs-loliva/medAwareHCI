@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { Sidebar } from "./Sidebar";
 import { TopBar } from "./TopBar";
+import { AccessibilityApplier } from "./AccessibilityApplier";
 
 type AppShellProps = {
   children: ReactNode;
@@ -17,6 +18,7 @@ export function AppShell({
 }: AppShellProps) {
   return (
     <main className="min-h-screen bg-[#F6F8FB] text-[#101828]">
+      <AccessibilityApplier />
       <div className="flex min-h-screen">
         <Sidebar activePath={activePath} />
 

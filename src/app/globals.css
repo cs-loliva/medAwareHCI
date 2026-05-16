@@ -13,3 +13,38 @@ body {
 body {
   font-family: Arial, Helvetica, sans-serif;
 }
+
+.medaware-font-default {
+  font-size: 16px;
+}
+
+.medaware-font-large {
+  font-size: 18px;
+}
+
+.medaware-font-xl {
+  font-size: 20px;
+}
+
+.medaware-high-contrast body {
+  background: #ffffff;
+}
+
+.medaware-high-contrast main {
+  background: #ffffff;
+  color: #000000;
+}
+
+.medaware-high-contrast section,
+.medaware-high-contrast aside,
+.medaware-high-contrast header,
+.medaware-high-contrast form,
+.medaware-high-contrast div {
+  border-color: #101828;
+}
+
+.medaware-high-contrast p,
+.medaware-high-contrast span,
+.medaware-high-contrast label {
+  color: #101828;
+}
