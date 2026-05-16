@@ -5,6 +5,16 @@ import { CountdownTimer } from "@/components/features/civilian/CountdownTimer";
 import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { revalidatePath } from "next/cache";
+
+export const dynamic = "force-dynamic";
+
+type PageProps = {
+  searchParams?: Promise<{
+    message?: string;
+    error?: string;
+  }>;
+};
 
 type Medication = {
   id: string;
@@ -101,7 +111,44 @@ function getAlertVariant(severity: MedicationAlert["severity"]) {
   return "info";
 }
 
-export default async function DashboardPage() {
+async function archiveMedication(formData: FormData) {
+  "use server";
+
+  const supabase = await createClient();
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    redirect("/login");
+  }
+
+  const medicationId = String(formData.get("medicationId") ?? "");
+
+  if (!medicationId) {
+    redirect("/dashboard?error=Missing medication id.");
+  }
+
+  const { error } = await supabase
+    .from("medications")
+    .update({
+      status: "inactive",
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", medicationId)
+    .eq("user_id", user.id);
+
+  if (error) {
+    redirect(`/dashboard?error=${encodeURIComponent(error.message)}`);
+  }
+
+  revalidatePath("/dashboard");
+  redirect("/dashboard?message=Medication removed from active list.");
+}
+
+export default async function DashboardPage({ searchParams }: PageProps) {
+  const params = searchParams ? await searchParams : {};
   const supabase = await createClient();
 
   const {
@@ -122,6 +169,7 @@ export default async function DashboardPage() {
       .from("medications")
       .select("id, name, dose_amount, dose_unit, frequency, notes, status")
       .eq("user_id", user.id)
+      .neq("status", "inactive")
       .order("created_at", { ascending: true }),
 
     supabase
@@ -153,10 +201,7 @@ export default async function DashboardPage() {
     medicationIds.has(schedule.medication_id)
   );
 
-  const nextDose = getNextDose(
-    medications.filter((medication) => medication.status !== "inactive"),
-    schedules
-  );
+  const nextDose = getNextDose(medications, schedules);
 
   const adherenceScore = getAdherenceScore(logs);
   const criticalAlert = alerts.find((alert) => alert.severity === "critical");
@@ -170,6 +215,39 @@ export default async function DashboardPage() {
       subtitle="Track your next dose, adherence status, and active safety alerts."
       activePath="/dashboard"
     >
+      {params.message ? (
+        <Card className="mb-5 border-[#12B76A]/40 bg-[#EAFBF3]">
+          <Badge variant="success">Success</Badge>
+          <p className="mt-3 text-sm font-bold text-[#101828]">
+            {params.message}
+          </p>
+        </Card>
+      ) : null}
+
+      {params.error ? (
+        <Card className="mb-5 border-[#FF3F4D]/40 bg-[#FFF6F7]">
+          <Badge variant="danger">Error</Badge>
+          <p className="mt-3 text-sm font-bold text-[#FF3F4D]">
+            {params.error}
+          </p>
+        </Card>
+      ) : null}
+
+      {medicationsResponse.error ||
+      schedulesResponse.error ||
+      alertsResponse.error ||
+      logsResponse.error ? (
+        <Card className="mb-5">
+          <Badge variant="danger">Load warning</Badge>
+          <p className="mt-3 text-sm leading-6 text-[#667085]">
+            {medicationsResponse.error?.message ??
+              schedulesResponse.error?.message ??
+              alertsResponse.error?.message ??
+              logsResponse.error?.message}
+          </p>
+        </Card>
+      ) : null}
+
       <div className="grid gap-5 xl:grid-cols-[1.4fr_0.8fr]">
         <Card>
           {nextDose ? (
@@ -245,7 +323,9 @@ export default async function DashboardPage() {
           ) : (
             <>
               <Badge variant="success">Safety status</Badge>
-              <h2 className="mt-4 text-2xl font-black">No active danger alert</h2>
+              <h2 className="mt-4 text-2xl font-black">
+                No active danger alert
+              </h2>
               <p className="mt-3 text-sm leading-6 text-[#667085]">
                 No critical demo interaction is currently active for this
                 account.
@@ -311,33 +391,53 @@ export default async function DashboardPage() {
         </div>
 
         <div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-          {medications.map((medication) => (
-            <div
-              key={medication.id}
-              className="rounded-3xl border border-[#E6EAF0] bg-[#F6F8FB] p-5"
-            >
-              <Badge
-                variant={
-                  medication.status === "pending_review"
-                    ? "warning"
-                    : medication.status === "active"
-                      ? "success"
-                      : "default"
-                }
-              >
-                {medication.status.replace("_", " ")}
-              </Badge>
-
-              <h3 className="mt-4 text-xl font-black">{medication.name}</h3>
-              <p className="mt-2 text-sm text-[#667085]">
-                {medication.dose_amount} {medication.dose_unit} •{" "}
-                {medication.frequency}
-              </p>
-              <p className="mt-4 text-sm leading-6 text-[#667085]">
-                {medication.notes ?? "No notes added."}
-              </p>
+          {medications.length === 0 ? (
+            <div className="rounded-3xl bg-[#F6F8FB] p-5 text-sm text-[#667085] md:col-span-2 xl:col-span-3">
+              No active medications found. Add a medication to begin tracking.
             </div>
-          ))}
+          ) : (
+            medications.map((medication) => (
+              <div
+                key={medication.id}
+                className="rounded-3xl border border-[#E6EAF0] bg-[#F6F8FB] p-5"
+              >
+                <Badge
+                  variant={
+                    medication.status === "pending_review"
+                      ? "warning"
+                      : medication.status === "active"
+                        ? "success"
+                        : "default"
+                  }
+                >
+                  {medication.status.replace("_", " ")}
+                </Badge>
+
+                <h3 className="mt-4 text-xl font-black">{medication.name}</h3>
+                <p className="mt-2 text-sm text-[#667085]">
+                  {medication.dose_amount} {medication.dose_unit} •{" "}
+                  {medication.frequency}
+                </p>
+                <p className="mt-4 text-sm leading-6 text-[#667085]">
+                  {medication.notes ?? "No notes added."}
+                </p>
+
+                <form action={archiveMedication} className="mt-5">
+                  <input
+                    type="hidden"
+                    name="medicationId"
+                    value={medication.id}
+                  />
+                  <button
+                    type="submit"
+                    className="rounded-2xl bg-[#FFE8EC] px-4 py-2 text-sm font-black text-[#FF3F4D]"
+                  >
+                    Remove medication
+                  </button>
+                </form>
+              </div>
+            ))
+          )}
         </div>
       </Card>
     </AppShell>
