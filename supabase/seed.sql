@@ -504,3 +504,22 @@ values
     'taken'
   )
 on conflict do nothing;
+
+-- Outpatient appointment 
+-- Outpatient appointments
+insert into public.outpatient_appointments
+(id, patient_id, appointment_time, reason_for_visit, status)
+values
+  (
+    '00000000-0000-4000-8000-000000000401',
+    '00000000-0000-4000-8000-000000000203',
+    date_trunc('day', now()) + interval '10 hours',
+    'Medication adherence follow-up',
+    'scheduled'
+  )
+on conflict (id) do update
+set
+  appointment_time = excluded.appointment_time,
+  reason_for_visit = excluded.reason_for_visit,
+  status = excluded.status,
+  updated_at = now();
