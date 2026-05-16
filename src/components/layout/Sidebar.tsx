@@ -11,6 +11,7 @@ const navItems = [
   { href: "/offline", label: "Offline Sync" },
   { href: "/settings", label: "Settings" },
   { href: "/clinical/patients", label: "Patient Board" },
+  { href: "/clinical/alerts", label: "Alert Center" },
   { href: "/clinical/reviews", label: "Review Queue" },
   { href: "/admin", label: "Admin" },
   { href: "/role-select", label: "Switch Role" },
