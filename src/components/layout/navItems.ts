@@ -1,0 +1,15 @@
+export const navItems = [
+  { href: "/dashboard", label: "Civilian Dashboard" },
+  { href: "/adherence", label: "Adherence Risk" },
+  { href: "/care-circle", label: "Care Circle" },
+  { href: "/offline", label: "Offline Sync" },
+  { href: "/settings", label: "Settings" },
+  { href: "/widgets", label: "Widgets" },
+  { href: "/clinical/patients", label: "Patient Board" },
+  { href: "/clinical/alerts", label: "Alert Center" },
+  { href: "/clinical/clinic", label: "Clinic Queue" },
+  { href: "/clinical/reviews", label: "Review Queue" },
+  { href: "/admin", label: "Admin" },
+  { href: "/admin/system", label: "System Overview" },
+  { href: "/role-select", label: "Switch Role" },
+];

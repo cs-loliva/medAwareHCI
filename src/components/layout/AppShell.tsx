@@ -23,9 +23,9 @@ export function AppShell({
         <Sidebar activePath={activePath} />
 
         <section className="min-w-0 flex-1">
-          <TopBar title={title} subtitle={subtitle} />
+          <TopBar title={title} subtitle={subtitle} activePath={activePath} />
 
-          <div className="px-6 py-6">{children}</div>
+          <div className="px-4 py-4 sm:px-6 sm:py-6">{children}</div>
         </section>
       </div>
     </main>
