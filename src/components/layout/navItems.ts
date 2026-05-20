@@ -9,6 +9,7 @@ export type NavItem = {
 export const navItems = [
   { href: "/dashboard", label: "Civilian Dashboard", roles: ["civilian"] },
   { href: "/adherence", label: "Adherence Risk", roles: ["civilian"] },
+  { href: "/medications/interactions", label: "Interaction Review", roles: ["civilian"] },
   { href: "/care-circle", label: "Care Circle", roles: ["civilian", "caregiver"] },
   { href: "/offline", label: "Offline Sync", roles: ["civilian"] },
   { href: "/settings", label: "Settings", roles: ["civilian", "caregiver", "nurse", "doctor", "pharmacist", "admin"] },

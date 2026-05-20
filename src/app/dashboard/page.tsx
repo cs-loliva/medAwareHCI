@@ -405,10 +405,10 @@ export default async function DashboardPage({ searchParams }: PageProps) {
               </div>
 
               <Link
-                href="/interactions"
+                href="/medications/interactions"
                 className="mt-6 block rounded-2xl bg-[#FF3F4D] px-4 py-3 text-center text-sm font-black text-white"
               >
-                View details
+                Review medication interactions
               </Link>
             </>
           ) : (
@@ -421,6 +421,13 @@ export default async function DashboardPage({ searchParams }: PageProps) {
                 No critical demo interaction is currently active for this
                 account.
               </p>
+
+              <Link
+                href="/medications/interactions"
+                className="mt-6 inline-block text-sm font-black text-[#344054] underline"
+              >
+                Review medication interactions
+              </Link>
             </>
           )}
         </Card>
