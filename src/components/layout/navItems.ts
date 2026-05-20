@@ -12,6 +12,7 @@ export const navItems = [
   { href: "/medications/interactions", label: "Interaction Review", roles: ["civilian"] },
   { href: "/care-circle", label: "Care Circle", roles: ["civilian", "caregiver"] },
   { href: "/offline", label: "Offline Sync", roles: ["civilian"] },
+  { href: "/notifications", label: "Notifications", roles: ["civilian", "caregiver", "nurse", "doctor", "pharmacist", "admin"] },
   { href: "/settings", label: "Settings", roles: ["civilian", "caregiver", "nurse", "doctor", "pharmacist", "admin"] },
   { href: "/widgets", label: "Widgets", roles: ["civilian"] },
   { href: "/clinical/patients", label: "Patient Board", roles: ["nurse", "doctor", "admin"] },

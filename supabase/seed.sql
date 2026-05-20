@@ -391,23 +391,47 @@ on conflict do nothing;
 
 -- Notifications
 insert into public.notifications
-(user_id, type, title, message, status, metadata)
+(user_id, type, title, message, body, href, status, metadata)
 values
   (
     (select id from public.profiles where email = 'civilian@medaware.demo'),
-    'interaction_alert',
-    'Medication caution',
-    'Demo alert: Review Warfarin and Ibuprofen before continuing.',
+    'medication_reminder',
+    'Medication reminder',
+    'It is time to log your evening medication dose.',
+    'Prototype reminder: it is time to log your evening medication dose.',
+    '/dashboard',
     'unread',
-    '{"severity":"critical"}'
+    '{"severity":"low"}'
+  ),
+  (
+    (select id from public.profiles where email = 'caregiver@medaware.demo'),
+    'care_circle_update',
+    'Care circle update',
+    'A caregiver note was added for your shared patient profile.',
+    'Prototype care circle activity: a new note is available for review.',
+    '/care-circle',
+    'unread',
+    '{"source":"care_circle"}'
   ),
   (
     (select id from public.profiles where email = 'nurse@medaware.demo'),
-    'clinical_team',
-    'Clinical alert',
+    'clinical_safety_alert',
+    'Clinical safety alert',
     'Room 305 has an active medication safety alert.',
+    'Prototype safety alert: Room 305 has an active medication safety alert.',
+    '/clinical/alerts',
     'unread',
     '{"room":"305"}'
+  ),
+  (
+    (select id from public.profiles where email = 'pharmacist@medaware.demo'),
+    'pharmacist_review',
+    'Pharmacist review update',
+    'A pending clinical medication review requires pharmacist input.',
+    'Prototype review message: please check the pending clinical review queue.',
+    '/clinical/reviews',
+    'unread',
+    '{"queue":"clinical_reviews"}'
   )
 on conflict do nothing;
 
