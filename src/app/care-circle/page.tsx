@@ -3,6 +3,7 @@ import { Badge } from "@/components/ui/Badge";
 import { Card } from "@/components/ui/Card";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
+import Link from "next/link";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
@@ -415,6 +416,16 @@ export default async function CareCirclePage({ searchParams }: PageProps) {
                         </Badge>
                         <Badge variant="info">{membership.permission}</Badge>
                       </div>
+                      {membership.status === "active" ? (
+                        <div className="mt-4">
+                          <Link
+                            href={`/care-circle/shared/${membership.owner_id}`}
+                            className="inline-flex rounded-2xl bg-white px-4 py-2 text-sm font-black text-[#101828] shadow-sm"
+                          >
+                            Open shared medication view
+                          </Link>
+                        </div>
+                      ) : null}
                     </div>
                   );
                 })
