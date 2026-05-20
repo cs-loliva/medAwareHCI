@@ -131,17 +131,27 @@ async function archiveMedication(formData: FormData) {
     redirect("/dashboard?error=Missing medication id.");
   }
 
-  const { error } = await supabase
+  const { data, error } = await supabase
     .from("medications")
     .update({
       status: "inactive",
       updated_at: new Date().toISOString(),
     })
     .eq("id", medicationId)
-    .eq("user_id", user.id);
+    .eq("user_id", user.id)
+    .select("id")
+    .maybeSingle();
 
   if (error) {
     redirect(`/dashboard?error=${encodeURIComponent(error.message)}`);
+  }
+
+  if (!data) {
+    redirect(
+      `/dashboard?error=${encodeURIComponent(
+        "Medication could not be found for this account."
+      )}`
+    );
   }
 
   revalidatePath("/dashboard");
@@ -424,10 +434,10 @@ export default async function DashboardPage({ searchParams }: PageProps) {
                 </p>
 
                 <ArchiveMedicationForm
-  action={archiveMedication}
-  medicationId={medication.id}
-  medicationName={medication.name}
-/>
+                  action={archiveMedication}
+                  medicationId={medication.id}
+                  medicationName={medication.name}
+                />
               </div>
             ))
           )}
