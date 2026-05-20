@@ -8,7 +8,7 @@ export function isPublicRoute(pathname: string) {
 
 export function getRequiredRolesForPath(pathname: string): Role[] {
   if (pathname === "/role-select") {
-    return ["civilian", "caregiver", "nurse", "doctor", "pharmacist", "admin"];
+    return [];
   }
 
   if (

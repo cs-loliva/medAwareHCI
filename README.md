@@ -214,6 +214,22 @@ A successful production build means the app is ready for deployment testing.
 
 ---
 
+
+## Google Account QA Checklist
+
+- Continue with Google
+- Complete profile setup
+- Confirm civilian role
+- Add medication
+- View dashboard
+- Edit medication
+- View safety evidence
+- Archive medication
+- Restore medication
+- Sign out and sign back in
+
+---
+
 ## Main Routes
 
 ### Public Routes
