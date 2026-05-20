@@ -39,6 +39,9 @@ export default async function MedicationSafetyEvidencePage({ params }: PageProps
         <p className="rounded-2xl border border-[#F9D7DA] bg-[#FFF6F7] p-4 text-sm font-bold text-[#B42318]">
           This page summarizes public label evidence for academic prototype use only. It does not provide medical advice or clinical decision support.
         </p>
+        <p className="mt-3 rounded-2xl border border-[#F9D7DA] bg-[#FFF6F7] p-4 text-sm font-bold text-[#B42318]">
+          Label dosage information is shown for educational prototype reference only. It does not verify that a dose is appropriate for a specific person.
+        </p>
 
         <div className="mt-5 space-y-2 text-sm text-[#344054]">
           <p><span className="font-black">Medication:</span> {medication.name}</p>

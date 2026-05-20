@@ -17,7 +17,32 @@ export async function POST(request: Request) {
       );
     }
 
-    const normalization = await normalizeDrugName(name);
+    let normalization;
+    try {
+      normalization = await normalizeDrugName(name);
+    } catch {
+      return NextResponse.json(
+        {
+          error:
+            "Medication validation service is currently unavailable. Please try again later.",
+          errorType: "service_unavailable",
+        },
+        { status: 503 }
+      );
+    }
+
+    if (!normalization.rxcui) {
+      return NextResponse.json(
+        {
+          error:
+            "Medication name was not recognized. Please enter a generic or recognized brand drug name.",
+          errorType: "unrecognized_name",
+          normalization,
+          safetyEvidence: [],
+        },
+        { status: 422 }
+      );
+    }
     const safetyEvidence = await getLabelSafetyEvidence({ name, rxcui: normalization.rxcui });
 
     return NextResponse.json({ normalization, safetyEvidence });

@@ -3,7 +3,7 @@ import { Badge } from "@/components/ui/Badge";
 import { Card } from "@/components/ui/Card";
 import { createClient } from "@/lib/supabase/server";
 import { getLabelSafetyEvidence } from "@/lib/medications/openfda";
-import { normalizeDrugName } from "@/lib/medications/rxnorm";
+import { validateDoseInput, validateMedicationName } from "@/lib/medications/validation";
 import { revalidatePath } from "next/cache";
 import Link from "next/link";
 import { redirect } from "next/navigation";
@@ -64,15 +64,16 @@ async function updateMedication(formData: FormData) {
     redirectWithError("Please fill in all required fields.");
   }
 
-  const doseAmount = Number(doseAmountRaw);
-
-  if (!Number.isFinite(doseAmount) || doseAmount <= 0) {
-    redirectWithError("Dose amount must be a number greater than zero.");
+  const doseValidation = validateDoseInput({
+    doseAmount: doseAmountRaw,
+    doseUnit,
+    frequency,
+    scheduledTime,
+  });
+  if (!doseValidation.ok) {
+    redirectWithError(doseValidation.error);
   }
-
-  if (!/^([01]\d|2[0-3]):[0-5]\d$/.test(scheduledTime)) {
-    redirectWithError("Scheduled time must use HH:MM format.");
-  }
+  const doseAmount = doseValidation.doseAmount;
 
   const notes = notesRaw.length > 0 ? notesRaw : null;
 
@@ -84,11 +85,16 @@ async function updateMedication(formData: FormData) {
   };
   let safetyEvidence: unknown[] = [];
 
+  const nameValidation = await validateMedicationName(name);
+  if (!nameValidation.ok) {
+    redirectWithError(nameValidation.error);
+  }
+
+  normalization = nameValidation.normalization;
   try {
-    normalization = await normalizeDrugName(name);
     safetyEvidence = await getLabelSafetyEvidence({ name, rxcui: normalization.rxcui });
   } catch {
-    // Graceful fallback: preserve save flow.
+    safetyEvidence = [];
   }
 
   const { data: updatedMedication, error: medicationError } = await supabase

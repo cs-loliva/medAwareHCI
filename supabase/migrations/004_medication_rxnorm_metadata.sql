@@ -5,3 +5,5 @@ alter table public.medications
   add column if not exists normalization_confidence text,
   add column if not exists safety_evidence jsonb default '[]'::jsonb,
   add column if not exists safety_checked_at timestamptz;
+
+notify pgrst, 'reload schema';
