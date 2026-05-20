@@ -2,6 +2,7 @@ import { AppShell } from "@/components/layout/AppShell";
 import { Badge } from "@/components/ui/Badge";
 import { Card } from "@/components/ui/Card";
 import { createClient } from "@/lib/supabase/server";
+import { canAccessPatient, getCurrentUserWithRoles } from "@/lib/auth/clinicalAccess";
 import { revalidatePath } from "next/cache";
 import Link from "next/link";
 import { redirect } from "next/navigation";
@@ -119,6 +120,11 @@ async function addCareNote(formData: FormData) {
       `/clinical/patients/${patientId}/notes?error=Only nurses and doctors can create care notes.`
     );
   }
+  const { roleNames } = await getCurrentUserWithRoles();
+  const hasAccess = await canAccessPatient(user.id, roleNames, patientId);
+  if (!hasAccess) {
+    redirect(`/clinical/patients/${patientId}/notes?error=Patient access denied.`);
+  }
 
   const { error } = await supabase.from("care_notes").insert({
     patient_id: patientId,
@@ -140,11 +146,28 @@ async function addCareNote(formData: FormData) {
 }
 
 export default async function CareNotesPage({ params, searchParams }: PageProps) {
-  await getCurrentUser();
+  const { user, roleNames } = await getCurrentUserWithRoles();
 
   const { patientId } = await params;
   const query = searchParams ? await searchParams : {};
   const roleFilter = query.role;
+  const hasAccess = await canAccessPatient(user.id, roleNames, patientId);
+  if (!hasAccess) {
+    return (
+      <AppShell
+        title="Care Notes and Rounds"
+        subtitle="Access is restricted for this patient."
+        activePath="/clinical/patients"
+      >
+        <Card>
+          <Badge variant="danger">Access denied</Badge>
+          <p className="mt-3 text-sm text-[#667085]">
+            You do not currently have access to this patient record.
+          </p>
+        </Card>
+      </AppShell>
+    );
+  }
 
   const supabase = await createClient();
 

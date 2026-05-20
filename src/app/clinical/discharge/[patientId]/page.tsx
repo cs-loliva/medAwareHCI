@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/Badge";
 import { Card } from "@/components/ui/Card";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
+import { canAccessPatient, getCurrentUserWithRoles } from "@/lib/auth/clinicalAccess";
 import { revalidatePath } from "next/cache";
 import Link from "next/link";
 import { redirect } from "next/navigation";
@@ -131,11 +132,20 @@ export default async function DischargeInstructionsPage({
   params,
   searchParams,
 }: PageProps) {
-  await getCurrentUser();
-
   const { patientId } = await params;
   const query = searchParams ? await searchParams : {};
-  const supabase = await createClient();
+  const { user, roleNames, supabase } = await getCurrentUserWithRoles();
+  const hasAccess = await canAccessPatient(user.id, roleNames, patientId);
+  if (!hasAccess) {
+    return (
+      <AppShell title="Discharge Instructions" subtitle="Access denied." activePath="/clinical/patients">
+        <Card>
+          <Badge variant="danger">Access denied</Badge>
+          <p className="mt-3 text-sm text-[#667085]">You do not currently have access to this patient record.</p>
+        </Card>
+      </AppShell>
+    );
+  }
 
   const [patientResponse, medicationsResponse, alertsResponse] =
     await Promise.all([
