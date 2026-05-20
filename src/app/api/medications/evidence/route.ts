@@ -43,7 +43,12 @@ export async function POST(request: Request) {
         { status: 422 }
       );
     }
-    const safetyEvidence = await getLabelSafetyEvidence({ name, rxcui: normalization.rxcui });
+    let safetyEvidence: unknown[] = [];
+    try {
+      safetyEvidence = await getLabelSafetyEvidence({ name, rxcui: normalization.rxcui });
+    } catch {
+      safetyEvidence = [];
+    }
 
     return NextResponse.json({ normalization, safetyEvidence });
   } catch {
