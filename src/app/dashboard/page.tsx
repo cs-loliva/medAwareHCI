@@ -26,6 +26,9 @@ type Medication = {
   frequency: string;
   notes: string | null;
   status: string;
+  rxcui: string | null;
+  normalized_name: string | null;
+  safety_evidence: unknown[] | null;
 };
 
 type MedicationSchedule = {
@@ -40,6 +43,9 @@ type MedicationAlert = {
   rule_key: string;
   description: string;
   status: string;
+  rxcui: string | null;
+  normalized_name: string | null;
+  safety_evidence: unknown[] | null;
 };
 
 type MedicationLog = {
@@ -239,14 +245,14 @@ export default async function DashboardPage({ searchParams }: PageProps) {
   ] = await Promise.all([
     supabase
       .from("medications")
-      .select("id, name, dose_amount, dose_unit, frequency, notes, status")
+      .select("id, name, dose_amount, dose_unit, frequency, notes, status, rxcui, normalized_name, safety_evidence")
       .eq("user_id", user.id)
       .neq("status", "inactive")
       .order("created_at", { ascending: true }),
 
     supabase
       .from("medications")
-      .select("id, name, dose_amount, dose_unit, frequency, notes, status")
+      .select("id, name, dose_amount, dose_unit, frequency, notes, status, rxcui, normalized_name, safety_evidence")
       .eq("user_id", user.id)
       .eq("status", "inactive")
       .order("updated_at", { ascending: false }),
@@ -503,16 +509,28 @@ export default async function DashboardPage({ searchParams }: PageProps) {
                   {medication.dose_amount} {medication.dose_unit} •{" "}
                   {medication.frequency}
                 </p>
+                {medication.normalized_name ? (
+                  <p className="mt-2 text-xs text-[#667085]">Normalized: {medication.normalized_name}</p>
+                ) : null}
+                {medication.rxcui ? (
+                  <p className="mt-1 text-xs text-[#667085]">RxCUI: {medication.rxcui}</p>
+                ) : null}
+                <div className="mt-2 flex flex-wrap gap-2">
+                  <Badge variant={medication.rxcui ? "success" : "default"}>
+                    {medication.rxcui ? "RxNorm matched" : "No external match"}
+                  </Badge>
+                  {Array.isArray(medication.safety_evidence) && medication.safety_evidence.length > 0 ? (
+                    <Badge variant="info">Label evidence available</Badge>
+                  ) : null}
+                </div>
                 <p className="mt-4 text-sm leading-6 text-[#667085]">
                   {medication.notes ?? "No notes added."}
                 </p>
 
-                <Link
-                  href={`/medications/${medication.id}/edit`}
-                  className="mt-4 inline-block text-sm font-black text-[#344054] underline"
-                >
-                  Edit
-                </Link>
+                <div className="mt-4 flex gap-3 text-sm font-black text-[#344054]">
+                  <Link href={`/medications/${medication.id}/edit`} className="underline">Edit</Link>
+                  <Link href={`/medications/${medication.id}/safety`} className="underline">View safety evidence</Link>
+                </div>
 
                 <ArchiveMedicationForm
                   action={archiveMedication}
