@@ -218,6 +218,18 @@ export default async function DashboardPage({ searchParams }: PageProps) {
     redirect("/login");
   }
 
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("first_name, full_name")
+    .eq("id", user.id)
+    .maybeSingle();
+
+  const firstName =
+    profile?.first_name?.trim() ||
+    profile?.full_name?.trim()?.split(/\s+/)[0] ||
+    user.email ||
+    "there";
+
   const [
     medicationsResponse,
     archivedMedicationsResponse,
@@ -292,6 +304,8 @@ export default async function DashboardPage({ searchParams }: PageProps) {
           </p>
         </Card>
       ) : null}
+
+      <p className="mb-5 text-lg font-semibold">Welcome back, {firstName}</p>
 
       {params.error ? (
         <Card className="mb-5 border-[#FF3F4D]/40 bg-[#FFF6F7]">

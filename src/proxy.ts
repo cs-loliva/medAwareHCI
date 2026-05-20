@@ -20,6 +20,21 @@ function redirectTo(request: NextRequest, pathname: string) {
   return NextResponse.redirect(url);
 }
 
+
+
+async function getProfileCompleted(
+  supabase: ReturnType<typeof createServerClient>,
+  userId: string
+): Promise<boolean> {
+  const { data } = await supabase
+    .from("profiles")
+    .select("profile_completed")
+    .eq("id", userId)
+    .maybeSingle();
+
+  return Boolean(data?.profile_completed);
+}
+
 async function getUserRoles(
   supabase: ReturnType<typeof createServerClient>,
   userId: string
@@ -97,6 +112,16 @@ export async function proxy(request: NextRequest) {
     loginUrl.pathname = "/login";
     loginUrl.searchParams.set("next", pathname);
     return NextResponse.redirect(loginUrl);
+  }
+
+  const profileCompleted = await getProfileCompleted(supabase, user.id);
+
+  if (
+    !profileCompleted &&
+    pathname !== "/profile/setup" &&
+    pathname !== "/auth/callback"
+  ) {
+    return redirectTo(request, "/profile/setup");
   }
 
   const roles = await getUserRoles(supabase, user.id);

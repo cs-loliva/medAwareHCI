@@ -1,6 +1,6 @@
 import type { Role } from "./roles";
 
-export const PUBLIC_ROUTES = ["/", "/login", "/unauthorized"];
+export const PUBLIC_ROUTES = ["/", "/login", "/unauthorized", "/auth/callback"];
 
 export function isPublicRoute(pathname: string) {
   return PUBLIC_ROUTES.some((route) => pathname === route);

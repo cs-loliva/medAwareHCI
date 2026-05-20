@@ -18,6 +18,36 @@ function LoginForm() {
   const [password, setPassword] = useState("");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
+
+
+
+  async function handleGoogleLogin() {
+    setErrorMessage(null);
+
+    if (!hasSupabaseEnv) {
+      setErrorMessage(
+        "Supabase credentials are not configured yet. Add them to .env.local before logging in."
+      );
+      return;
+    }
+
+    setIsGoogleLoading(true);
+    const supabase = createClient();
+
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        redirectTo: `${window.location.origin}/auth/callback?next=/profile/setup`,
+      },
+    });
+
+    setIsGoogleLoading(false);
+
+    if (error) {
+      setErrorMessage(error.message);
+    }
+  }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -110,6 +140,15 @@ function LoginForm() {
         className="mt-6 w-full rounded-2xl bg-[#FF3F4D] px-5 py-3 text-sm font-black text-white shadow-lg transition hover:bg-[#E73542] focus:outline-none focus:ring-4 focus:ring-[#FFE8EC] disabled:cursor-not-allowed disabled:opacity-60"
       >
         {isLoading ? "Signing in..." : "Sign in"}
+      </button>
+
+      <button
+        type="button"
+        onClick={handleGoogleLogin}
+        disabled={isGoogleLoading}
+        className="mt-3 w-full rounded-2xl border border-[#E6EAF0] bg-white px-5 py-3 text-sm font-black text-[#101828] shadow-sm transition hover:bg-[#F6F8FB] focus:outline-none focus:ring-4 focus:ring-[#E6EAF0] disabled:cursor-not-allowed disabled:opacity-60"
+      >
+        {isGoogleLoading ? "Redirecting..." : "Continue with Google"}
       </button>
 
       <div id="demo-email-help" className="mt-6 text-xs leading-6 text-[#667085]">
