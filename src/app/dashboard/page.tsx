@@ -493,6 +493,13 @@ export default async function DashboardPage({ searchParams }: PageProps) {
                   {medication.notes ?? "No notes added."}
                 </p>
 
+                <Link
+                  href={`/medications/${medication.id}/edit`}
+                  className="mt-4 inline-block text-sm font-black text-[#344054] underline"
+                >
+                  Edit
+                </Link>
+
                 <ArchiveMedicationForm
                   action={archiveMedication}
                   medicationId={medication.id}
