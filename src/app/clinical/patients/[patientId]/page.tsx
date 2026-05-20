@@ -1,6 +1,7 @@
 import { AppShell } from "@/components/layout/AppShell";
 import { Badge } from "@/components/ui/Badge";
 import { Card } from "@/components/ui/Card";
+import { AdministerMedicationForm } from "@/components/features/clinical/AdministerMedicationForm";
 import { createClient } from "@/lib/supabase/server";
 import { canAccessPatient, getCurrentUserWithRoles } from "@/lib/auth/clinicalAccess";
 import { revalidatePath } from "next/cache";
@@ -502,19 +503,13 @@ export default async function PatientMedicationTrackerPage({
                         )}
                       </div>
 
-                      <form action={markDoseAdministered} className="mt-5">
-                        <input
-                          type="hidden"
-                          name="patientId"
-                          value={patient.id}
-                        />
-                        <input
-                          type="hidden"
-                          name="medicationId"
-                          value={medication.id}
-                        />
-                        <button
-                          type="submit"
+                      <div className="mt-5">
+                        <AdministerMedicationForm
+                          patientId={patient.id}
+                          medicationId={medication.id}
+                          medicationName={medication.name}
+                          doseLabel={`${medication.dose_amount} ${medication.dose_unit} • ${medication.frequency}`}
+                          action={markDoseAdministered}
                           disabled={
                             medication.status === "on_hold" ||
                             medication.status === "pending_review" ||
@@ -522,11 +517,19 @@ export default async function PatientMedicationTrackerPage({
                               (alert) => alert.severity === "critical"
                             )
                           }
-                          className="w-full rounded-2xl bg-[#FF3F4D] px-4 py-3 text-sm font-black text-white disabled:cursor-not-allowed disabled:opacity-50"
-                        >
-                          Mark administered
-                        </button>
-                      </form>
+                          disabledReason={
+                            medication.status === "on_hold"
+                              ? "Medication is on hold and cannot be administered."
+                              : medication.status === "pending_review"
+                              ? "Medication is pending pharmacist review."
+                              : medicationAlerts.some(
+                                  (alert) => alert.severity === "critical"
+                                )
+                              ? "Medication has an active critical safety alert."
+                              : undefined
+                          }
+                        />
+                      </div>
                     </aside>
                   </div>
                 </div>
