@@ -244,6 +244,34 @@ export default function AddMedicationPage() {
 
     const status = highestSeverity === "critical" ? "pending_review" : "active";
 
+    let normalization = {
+      rxcui: null as string | null,
+      normalizedName: null as string | null,
+      source: "none" as "rxnorm" | "none",
+      confidence: "none" as "exact_or_normalized" | "approximate" | "none",
+    };
+    let safetyEvidence: unknown[] = [];
+
+    try {
+      const response = await fetch("/api/medications/evidence", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: name.trim() }),
+      });
+
+      if (response.ok) {
+        const data = (await response.json()) as {
+          normalization?: typeof normalization;
+          safetyEvidence?: unknown[];
+        };
+
+        normalization = data.normalization ?? normalization;
+        safetyEvidence = Array.isArray(data.safetyEvidence) ? data.safetyEvidence : [];
+      }
+    } catch {
+      // Graceful fallback: save medication even if evidence APIs fail.
+    }
+
     const { data: medication, error: medicationError } = await supabase
       .from("medications")
       .insert({
@@ -256,6 +284,12 @@ export default function AddMedicationPage() {
         end_date: endDate || null,
         notes: notes.trim() || null,
         status,
+        rxcui: normalization.rxcui,
+        normalized_name: normalization.normalizedName,
+        normalization_source: normalization.source,
+        normalization_confidence: normalization.confidence,
+        safety_evidence: safetyEvidence,
+        safety_checked_at: new Date().toISOString(),
       })
       .select("id")
       .single();

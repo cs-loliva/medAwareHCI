@@ -2,6 +2,8 @@ import { AppShell } from "@/components/layout/AppShell";
 import { Badge } from "@/components/ui/Badge";
 import { Card } from "@/components/ui/Card";
 import { createClient } from "@/lib/supabase/server";
+import { getLabelSafetyEvidence } from "@/lib/medications/openfda";
+import { normalizeDrugName } from "@/lib/medications/rxnorm";
 import { revalidatePath } from "next/cache";
 import Link from "next/link";
 import { redirect } from "next/navigation";
@@ -74,6 +76,21 @@ async function updateMedication(formData: FormData) {
 
   const notes = notesRaw.length > 0 ? notesRaw : null;
 
+  let normalization = {
+    rxcui: null as string | null,
+    normalizedName: null as string | null,
+    source: "none" as "rxnorm" | "none",
+    confidence: "none" as "exact_or_normalized" | "approximate" | "none",
+  };
+  let safetyEvidence: unknown[] = [];
+
+  try {
+    normalization = await normalizeDrugName(name);
+    safetyEvidence = await getLabelSafetyEvidence({ name, rxcui: normalization.rxcui });
+  } catch {
+    // Graceful fallback: preserve save flow.
+  }
+
   const { data: updatedMedication, error: medicationError } = await supabase
     .from("medications")
     .update({
@@ -82,6 +99,12 @@ async function updateMedication(formData: FormData) {
       dose_unit: doseUnit,
       frequency,
       notes,
+      rxcui: normalization.rxcui,
+      normalized_name: normalization.normalizedName,
+      normalization_source: normalization.source,
+      normalization_confidence: normalization.confidence,
+      safety_evidence: safetyEvidence,
+      safety_checked_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
     })
     .eq("id", medicationId)
