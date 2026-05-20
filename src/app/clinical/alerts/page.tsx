@@ -2,6 +2,7 @@ import { AppShell } from "@/components/layout/AppShell";
 import { Badge } from "@/components/ui/Badge";
 import { Card } from "@/components/ui/Card";
 import { createClient } from "@/lib/supabase/server";
+import { getAccessiblePatientIds, getCurrentUserWithRoles, isAdmin } from "@/lib/auth/clinicalAccess";
 import { revalidatePath } from "next/cache";
 import Link from "next/link";
 import { redirect } from "next/navigation";
@@ -130,12 +131,13 @@ async function acknowledgeAlert(formData: FormData) {
 }
 
 export default async function ClinicalAlertsPage({ searchParams }: PageProps) {
-  await getCurrentUser();
-
   const params = searchParams ? await searchParams : {};
-  const supabase = await createClient();
+  const { user, roleNames, supabase } = await getCurrentUserWithRoles();
+  const accessiblePatientIds = await getAccessiblePatientIds(user.id, roleNames);
+  const canViewAll = isAdmin(roleNames);
 
-  const { data, error } = await supabase
+  const { data, error } = await (canViewAll
+    ? supabase
     .from("clinical_alerts")
     .select(
       `
@@ -169,6 +171,41 @@ export default async function ClinicalAlertsPage({ searchParams }: PageProps) {
       )
     `
     )
+    : supabase
+        .from("clinical_alerts")
+        .select(
+          `
+      id,
+      patient_id,
+      severity,
+      rule_key,
+      description,
+      status,
+      acknowledged_at,
+      created_at,
+      patient:patient_id (
+        full_name,
+        room_number,
+        ward,
+        primary_diagnosis
+      ),
+      medication_a:patient_medication_id_a (
+        name,
+        dose_amount,
+        dose_unit,
+        frequency,
+        status
+      ),
+      medication_b:patient_medication_id_b (
+        name,
+        dose_amount,
+        dose_unit,
+        frequency,
+        status
+      )
+    `
+        )
+        .in("patient_id", accessiblePatientIds ?? ["__none__"]))
     .order("created_at", { ascending: false });
 
   const alerts = sortAlerts((data ?? []) as unknown as ClinicalAlert[]);

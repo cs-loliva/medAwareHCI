@@ -2,6 +2,7 @@ import { AppShell } from "@/components/layout/AppShell";
 import { Badge } from "@/components/ui/Badge";
 import { Card } from "@/components/ui/Card";
 import { createClient } from "@/lib/supabase/server";
+import { canAccessPatient, getCurrentUserWithRoles } from "@/lib/auth/clinicalAccess";
 import { revalidatePath } from "next/cache";
 import Link from "next/link";
 import { redirect } from "next/navigation";
@@ -180,11 +181,9 @@ export default async function ClinicalDangerAlertPage({
   params,
   searchParams,
 }: PageProps) {
-  await getCurrentUser();
-
   const { alertId } = await params;
   const query = searchParams ? await searchParams : {};
-  const supabase = await createClient();
+  const { user, roleNames, supabase } = await getCurrentUserWithRoles();
 
   const { data, error } = await supabase
     .from("clinical_alerts")
@@ -248,6 +247,10 @@ export default async function ClinicalDangerAlertPage({
   }
 
   const alert = data as unknown as ClinicalAlert;
+  const hasAccess = await canAccessPatient(user.id, roleNames, alert.patient_id);
+  if (!hasAccess) {
+    redirect("/clinical/alerts?error=Patient access denied.");
+  }
 
   return (
     <AppShell

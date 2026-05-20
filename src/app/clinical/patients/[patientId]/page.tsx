@@ -2,6 +2,7 @@ import { AppShell } from "@/components/layout/AppShell";
 import { Badge } from "@/components/ui/Badge";
 import { Card } from "@/components/ui/Card";
 import { createClient } from "@/lib/supabase/server";
+import { canAccessPatient, getCurrentUserWithRoles } from "@/lib/auth/clinicalAccess";
 import { revalidatePath } from "next/cache";
 import Link from "next/link";
 import { redirect } from "next/navigation";
@@ -162,11 +163,13 @@ export default async function PatientMedicationTrackerPage({
   params,
   searchParams,
 }: PageProps) {
-  await getCurrentUser();
-
   const { patientId } = await params;
   const query = searchParams ? await searchParams : {};
-  const supabase = await createClient();
+  const { user, roleNames, supabase } = await getCurrentUserWithRoles();
+  const hasAccess = await canAccessPatient(user.id, roleNames, patientId);
+  if (!hasAccess) {
+    redirect("/clinical/patients?error=Patient access denied.");
+  }
 
   const [
     patientResponse,

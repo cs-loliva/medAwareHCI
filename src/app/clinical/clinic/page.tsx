@@ -2,6 +2,7 @@ import { AppShell } from "@/components/layout/AppShell";
 import { Badge } from "@/components/ui/Badge";
 import { Card } from "@/components/ui/Card";
 import { createClient } from "@/lib/supabase/server";
+import { getAccessiblePatientIds, getCurrentUserWithRoles, isAdmin } from "@/lib/auth/clinicalAccess";
 import { revalidatePath } from "next/cache";
 import Link from "next/link";
 import { redirect } from "next/navigation";
@@ -158,10 +159,10 @@ async function updateAppointmentStatus(formData: FormData) {
 }
 
 export default async function ClinicQueuePage({ searchParams }: PageProps) {
-  await getCurrentUser();
-
   const params = searchParams ? await searchParams : {};
-  const supabase = await createClient();
+  const { user, roleNames, supabase } = await getCurrentUserWithRoles();
+  const accessiblePatientIds = await getAccessiblePatientIds(user.id, roleNames);
+  const canViewAll = isAdmin(roleNames);
 
   const todayStart = new Date();
   todayStart.setHours(0, 0, 0, 0);
@@ -171,7 +172,8 @@ export default async function ClinicQueuePage({ searchParams }: PageProps) {
 
   const [appointmentsResponse, medicationsResponse, alertsResponse] =
     await Promise.all([
-      supabase
+      (canViewAll
+        ? supabase
         .from("outpatient_appointments")
         .select(
           `
@@ -193,6 +195,29 @@ export default async function ClinicQueuePage({ searchParams }: PageProps) {
         )
         .gte("appointment_time", todayStart.toISOString())
         .lt("appointment_time", tomorrowStart.toISOString())
+        : supabase
+            .from("outpatient_appointments")
+            .select(
+              `
+          id,
+          patient_id,
+          appointment_time,
+          reason_for_visit,
+          status,
+          patient:patient_id (
+            id,
+            full_name,
+            room_number,
+            ward,
+            primary_diagnosis,
+            allergies,
+            status
+          )
+        `
+            )
+            .in("patient_id", accessiblePatientIds ?? ["__none__"])
+            .gte("appointment_time", todayStart.toISOString())
+            .lt("appointment_time", tomorrowStart.toISOString()))
         .order("appointment_time", { ascending: true }),
 
       supabase

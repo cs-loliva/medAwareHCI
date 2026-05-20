@@ -3,6 +3,11 @@ import { Badge } from "@/components/ui/Badge";
 import { Card } from "@/components/ui/Card";
 import { createClient } from "@/lib/supabase/server";
 import { getEffectiveRole, isRole, type Role } from "@/lib/auth/roles";
+import {
+  getAccessiblePatientIds,
+  getCurrentUserWithRoles,
+  isAdmin,
+} from "@/lib/auth/clinicalAccess";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { cookies } from "next/headers";
@@ -126,36 +131,24 @@ function getNextMedicationAction(
 }
 
 export default async function PatientBoardPage() {
-  const supabase = await createClient();
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    redirect("/login");
-  }
-
-  const { data: roleRows } = await supabase
-    .from("user_roles")
-    .select("roles(name)")
-    .eq("user_id", user.id);
-
-  const roles = (roleRows ?? [])
-    .flatMap((row: { roles: { name: string } | { name: string }[] | null }) => {
-      const relatedRole = row.roles;
-      if (Array.isArray(relatedRole)) return relatedRole.map((role) => role?.name);
-      return relatedRole?.name;
-    })
-    .filter((role): role is Role => Boolean(role && isRole(role)));
+  const { user, roleNames: roles, supabase } = await getCurrentUserWithRoles();
 
   const activeRole = (await cookies()).get("medaware_active_role")?.value;
   const effectiveRole = getEffectiveRole(roles, activeRole);
-  const dashboardTitle = effectiveRole === "doctor" ? "Doctor Dashboard" : "Nurse Dashboard";
+  const dashboardTitle =
+    effectiveRole === "doctor"
+      ? "Doctor Dashboard"
+      : effectiveRole === "pharmacist"
+      ? "Pharmacist Dashboard"
+      : "Nurse Dashboard";
   const dashboardSubtitle =
     effectiveRole === "doctor"
       ? "Review patient medication plans, clinical alerts, and discharge workflows."
+      : effectiveRole === "pharmacist"
+      ? "Review escalated medications, approve safe therapies, and flag unsafe orders."
       : "Review assigned patients, medication schedules, and active clinical alerts.";
+  const accessiblePatientIds = await getAccessiblePatientIds(user.id, roles);
+  const canViewAllPatients = isAdmin(roles);
 
   const [
     patientsResponse,
@@ -163,11 +156,18 @@ export default async function PatientBoardPage() {
     medicationsResponse,
     schedulesResponse,
   ] = await Promise.all([
-    supabase
+    (canViewAllPatients
+      ? supabase
       .from("patients")
       .select(
         "id, full_name, room_number, ward, primary_diagnosis, allergies, status, admission_date"
       )
+      : supabase
+          .from("patients")
+          .select(
+            "id, full_name, room_number, ward, primary_diagnosis, allergies, status, admission_date"
+          )
+          .in("id", accessiblePatientIds ?? ["__none__"]))
       .order("room_number", { ascending: true }),
 
     supabase
@@ -265,7 +265,7 @@ export default async function PatientBoardPage() {
         <div className="mt-6 space-y-4">
   {patients.length === 0 ? (
     <div className="rounded-3xl bg-[#F6F8FB] p-5 text-sm text-[#667085]">
-      No patients found.
+      No assigned patients found.
     </div>
   ) : (
     patients.map((patient) => {
