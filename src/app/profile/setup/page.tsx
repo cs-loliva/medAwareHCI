@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { redirect } from "next/navigation";
 
 type ProfileRow = {
@@ -19,10 +20,16 @@ function splitName(fullName: string | null) {
   };
 }
 
-export default async function ProfileSetupPage() {
+type ProfileSetupPageProps = {
+  searchParams?: Promise<{ error?: string }>;
+};
+
+export default async function ProfileSetupPage({ searchParams }: ProfileSetupPageProps) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/login");
+  const resolvedSearchParams = await searchParams;
+  const errorMessage = resolvedSearchParams?.error;
 
   const { data: profile } = await supabase
     .from("profiles")
@@ -42,6 +49,7 @@ export default async function ProfileSetupPage() {
     "use server";
 
     const supabase = await createClient();
+    const admin = createAdminClient();
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) redirect("/login");
 
@@ -53,6 +61,8 @@ export default async function ProfileSetupPage() {
 
     const provider = appMetadata.provider
       ?? ((metadata.picture || metadata.given_name || metadata.family_name) ? "google" : "email");
+    const avatar_url = metadata.avatar_url ?? metadata.picture ?? "";
+    const hasUpdatedAtColumn = !(await admin.from("profiles").select("updated_at").limit(1)).error;
 
     const updatePayload: Record<string, unknown> = {
       id: user.id,
@@ -60,32 +70,46 @@ export default async function ProfileSetupPage() {
       last_name,
       full_name,
       email: user.email ?? "",
-      avatar_url: avatarUrl,
+      avatar_url,
       profile_completed: true,
       auth_provider: provider,
-      updated_at: new Date().toISOString(),
     };
+    if (hasUpdatedAtColumn) updatePayload.updated_at = new Date().toISOString();
 
-    await supabase.from("profiles").upsert(updatePayload, { onConflict: "id" });
+    const { error: profileError } = await admin.from("profiles").upsert(updatePayload, { onConflict: "id" });
+    if (profileError) {
+      redirect(`/profile/setup?error=${encodeURIComponent(profileError.message)}`);
+    }
 
-    const { data: roleRows } = await supabase
+    const { data: roleRows, error: roleRowsError } = await admin
       .from("user_roles")
-      .select("id")
+      .select("role_id")
       .eq("user_id", user.id)
       .limit(1);
+    if (roleRowsError) {
+      redirect(`/profile/setup?error=${encodeURIComponent(roleRowsError.message)}`);
+    }
 
     if (!roleRows || roleRows.length === 0) {
-      const { data: civilianRole } = await supabase
+      const { data: civilianRole, error: civilianRoleError } = await admin
         .from("roles")
         .select("id")
         .eq("name", "civilian")
         .maybeSingle();
+      if (civilianRoleError) {
+        redirect(`/profile/setup?error=${encodeURIComponent(civilianRoleError.message)}`);
+      }
 
-      if (civilianRole?.id) {
-        await supabase.from("user_roles").insert({
-          user_id: user.id,
-          role_id: civilianRole.id,
-        });
+      if (!civilianRole?.id) {
+        redirect("/profile/setup?error=Civilian%20role%20not%20found.");
+      }
+
+      const { error: insertRoleError } = await admin.from("user_roles").insert({
+        user_id: user.id,
+        role_id: civilianRole.id,
+      });
+      if (insertRoleError) {
+        redirect(`/profile/setup?error=${encodeURIComponent(insertRoleError.message)}`);
       }
     }
 
@@ -98,6 +122,12 @@ export default async function ProfileSetupPage() {
       <p className="mt-3 rounded-xl bg-[#FFF6F7] p-4 text-sm text-[#667085]">
         MedAware is an academic prototype. Profile information is used for demo care coordination only and does not create a real clinical account.
       </p>
+      {errorMessage ? (
+        <div className="mt-4 rounded-xl border border-[#F04438] bg-[#FEE4E2] p-4 text-sm text-[#B42318]">
+          <p className="font-bold">Unable to save profile</p>
+          <p className="mt-1">{errorMessage}</p>
+        </div>
+      ) : null}
       <form action={saveProfile} className="mt-6 space-y-4 rounded-2xl border border-[#E6EAF0] p-6">
         <label className="block">
           <span className="text-sm font-bold">First name</span>
