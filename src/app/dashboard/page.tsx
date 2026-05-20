@@ -521,7 +521,9 @@ export default async function DashboardPage({ searchParams }: PageProps) {
                   </Badge>
                   {Array.isArray(medication.safety_evidence) && medication.safety_evidence.length > 0 ? (
                     <Badge variant="info">Label evidence available</Badge>
-                  ) : null}
+                  ) : (
+                    <Badge variant="default">No external evidence</Badge>
+                  )}
                 </div>
                 <p className="mt-4 text-sm leading-6 text-[#667085]">
                   {medication.notes ?? "No notes added."}

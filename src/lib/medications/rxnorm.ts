@@ -16,9 +16,7 @@ async function lookupRxNorm(name: string, search: "2" | "9") {
   const url = `https://rxnav.nlm.nih.gov/REST/rxcui.json?name=${encodeURIComponent(name)}&search=${search}`;
   const response = await fetch(url, { cache: "no-store" });
 
-  if (!response.ok) {
-    return null;
-  }
+  if (!response.ok) throw new Error("RXNORM_UNAVAILABLE");
 
   const data = (await response.json()) as RxNormResponse;
   const rxcui = data.idGroup?.rxnormId?.[0] ?? null;
@@ -56,8 +54,11 @@ export async function normalizeDrugName(name: string): Promise<DrugNormalization
         confidence: "approximate",
       };
     }
-  } catch {
-    // Graceful fallback for network/API failures.
+  } catch (error) {
+    if (error instanceof Error && error.message === "RXNORM_UNAVAILABLE") {
+      throw error;
+    }
+    throw new Error("RXNORM_UNAVAILABLE");
   }
 
   return { rxcui: null, normalizedName: null, source: "none", confidence: "none" };

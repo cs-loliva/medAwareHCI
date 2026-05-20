@@ -8,6 +8,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import { CenteredDangerModal } from "@/components/features/civilian/CenteredDangerModal";
+import { validateDoseInput } from "@/lib/medications/validation";
 
 type ExistingMedication = {
   id: string;
@@ -157,20 +158,23 @@ export default function AddMedicationPage() {
 
   function validateStepOne() {
     if (!name.trim()) return "Medication name is required.";
-    if (!doseAmount.trim()) return "Dose amount is required.";
-
-    const parsedDose = Number(doseAmount);
-    if (!Number.isFinite(parsedDose) || parsedDose <= 0) {
-      return "Dose amount must be a number greater than zero.";
-    }
-
-    if (!doseUnit.trim()) return "Dose unit is required.";
+    const doseValidation = validateDoseInput({
+      doseAmount,
+      doseUnit,
+      frequency: "Daily",
+    });
+    if (!doseValidation.ok) return doseValidation.error;
     return null;
   }
 
   function validateStepTwo() {
-    if (!frequency.trim()) return "Frequency is required.";
-    if (!scheduledTime.trim()) return "Scheduled time is required.";
+    const doseValidation = validateDoseInput({
+      doseAmount: doseAmount || "1",
+      doseUnit: doseUnit || "mg",
+      frequency,
+      scheduledTime,
+    });
+    if (!doseValidation.ok) return doseValidation.error;
     if (!startDate.trim()) return "Start date is required.";
 
     if (endDate && endDate < startDate) {
@@ -259,17 +263,28 @@ export default function AddMedicationPage() {
         body: JSON.stringify({ name: name.trim() }),
       });
 
+      const data = (await response.json()) as {
+        error?: string;
+        normalization?: typeof normalization;
+        safetyEvidence?: unknown[];
+      };
+      if (!response.ok) {
+        setIsSaving(false);
+        setErrorMessage(data.error ?? "Could not validate medication name.");
+        return;
+      }
+
       if (response.ok) {
-        const data = (await response.json()) as {
-          normalization?: typeof normalization;
-          safetyEvidence?: unknown[];
-        };
 
         normalization = data.normalization ?? normalization;
         safetyEvidence = Array.isArray(data.safetyEvidence) ? data.safetyEvidence : [];
       }
     } catch {
-      // Graceful fallback: save medication even if evidence APIs fail.
+      setIsSaving(false);
+      setErrorMessage(
+        "Medication validation service is currently unavailable. Please try again later."
+      );
+      return;
     }
 
     const { data: medication, error: medicationError } = await supabase

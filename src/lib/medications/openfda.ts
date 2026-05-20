@@ -16,6 +16,8 @@ const SECTIONS = [
   "warnings_and_cautions",
   "boxed_warning",
   "precautions",
+  "dosage_and_administration",
+  "dosage_forms_and_strengths",
 ] as const;
 
 function truncateText(value: string, max = 800) {
