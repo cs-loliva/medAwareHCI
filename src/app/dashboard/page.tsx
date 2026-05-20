@@ -7,6 +7,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { ArchiveMedicationForm } from "@/components/features/civilian/ArchiveMedicationForm";
+import { RestoreMedicationForm } from "@/components/features/civilian/RestoreMedicationForm";
 
 export const dynamic = "force-dynamic";
 
@@ -158,6 +159,53 @@ async function archiveMedication(formData: FormData) {
   redirect("/dashboard?message=Medication removed from active list.");
 }
 
+
+async function restoreMedication(formData: FormData) {
+  "use server";
+
+  const supabase = await createClient();
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    redirect("/login");
+  }
+
+  const medicationId = String(formData.get("medicationId") ?? "");
+
+  if (!medicationId) {
+    redirect("/dashboard?error=Missing medication id.");
+  }
+
+  const { data, error } = await supabase
+    .from("medications")
+    .update({
+      status: "active",
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", medicationId)
+    .eq("user_id", user.id)
+    .select("id")
+    .maybeSingle();
+
+  if (error) {
+    redirect(`/dashboard?error=${encodeURIComponent(error.message)}`);
+  }
+
+  if (!data) {
+    redirect(
+      `/dashboard?error=${encodeURIComponent(
+        "Medication could not be found for this account."
+      )}`
+    );
+  }
+
+  revalidatePath("/dashboard");
+  redirect("/dashboard?message=Medication restored to active list.");
+}
+
 export default async function DashboardPage({ searchParams }: PageProps) {
   const params = searchParams ? await searchParams : {};
   const supabase = await createClient();
@@ -172,6 +220,7 @@ export default async function DashboardPage({ searchParams }: PageProps) {
 
   const [
     medicationsResponse,
+    archivedMedicationsResponse,
     schedulesResponse,
     alertsResponse,
     logsResponse,
@@ -182,6 +231,13 @@ export default async function DashboardPage({ searchParams }: PageProps) {
       .eq("user_id", user.id)
       .neq("status", "inactive")
       .order("created_at", { ascending: true }),
+
+    supabase
+      .from("medications")
+      .select("id, name, dose_amount, dose_unit, frequency, notes, status")
+      .eq("user_id", user.id)
+      .eq("status", "inactive")
+      .order("updated_at", { ascending: false }),
 
     supabase
       .from("medication_schedules")
@@ -203,6 +259,8 @@ export default async function DashboardPage({ searchParams }: PageProps) {
   ]);
 
   const medications = (medicationsResponse.data ?? []) as Medication[];
+  const archivedMedications =
+    (archivedMedicationsResponse.data ?? []) as Medication[];
   const allSchedules = (schedulesResponse.data ?? []) as MedicationSchedule[];
   const alerts = (alertsResponse.data ?? []) as MedicationAlert[];
   const logs = (logsResponse.data ?? []) as MedicationLog[];
@@ -246,6 +304,7 @@ export default async function DashboardPage({ searchParams }: PageProps) {
 
       {medicationsResponse.error ||
       schedulesResponse.error ||
+      archivedMedicationsResponse.error ||
       alertsResponse.error ||
       logsResponse.error ? (
         <Card className="mb-5">
@@ -253,6 +312,7 @@ export default async function DashboardPage({ searchParams }: PageProps) {
           <p className="mt-3 text-sm leading-6 text-[#667085]">
             {medicationsResponse.error?.message ??
               schedulesResponse.error?.message ??
+              archivedMedicationsResponse.error?.message ??
               alertsResponse.error?.message ??
               logsResponse.error?.message}
           </p>
@@ -443,6 +503,49 @@ export default async function DashboardPage({ searchParams }: PageProps) {
           )}
         </div>
       </Card>
+
+      <Card className="mt-5">
+        <div>
+          <h2 className="text-2xl font-black">Archived medications</h2>
+          <p className="mt-2 text-sm text-[#667085]">
+            These medications are archived in your tracker and can be restored to
+            the active dashboard list.
+          </p>
+        </div>
+
+        <div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+          {archivedMedications.length === 0 ? (
+            <div className="rounded-3xl bg-[#F6F8FB] p-5 text-sm text-[#667085] md:col-span-2 xl:col-span-3">
+              No archived medications found.
+            </div>
+          ) : (
+            archivedMedications.map((medication) => (
+              <div
+                key={medication.id}
+                className="rounded-3xl border border-[#E6EAF0] bg-[#F6F8FB] p-5"
+              >
+                <Badge variant="default">inactive</Badge>
+
+                <h3 className="mt-4 text-xl font-black">{medication.name}</h3>
+                <p className="mt-2 text-sm text-[#667085]">
+                  {medication.dose_amount} {medication.dose_unit} •{" "}
+                  {medication.frequency}
+                </p>
+                <p className="mt-4 text-sm leading-6 text-[#667085]">
+                  {medication.notes ?? "No notes added."}
+                </p>
+
+                <RestoreMedicationForm
+                  action={restoreMedication}
+                  medicationId={medication.id}
+                  medicationName={medication.name}
+                />
+              </div>
+            ))
+          )}
+        </div>
+      </Card>
+
     </AppShell>
   );
 }
