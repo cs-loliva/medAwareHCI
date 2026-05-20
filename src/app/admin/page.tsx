@@ -234,8 +234,8 @@ export default async function AdminPage({ searchParams }: PageProps) {
 
   return (
     <AppShell
-      title="Admin Roles and Audit Logs"
-      subtitle="Manage demo user roles, review system activity, and inspect audit events."
+      title="Admin Dashboard"
+      subtitle="Manage roles, audit logs, and system access."
       activePath="/admin"
     >
       {params.message ? (

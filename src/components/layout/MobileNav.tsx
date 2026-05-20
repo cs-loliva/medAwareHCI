@@ -2,15 +2,17 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { navItems } from "./navItems";
+import { getVisibleNavItems } from "./navItems";
 import { SignOutButton } from "./SignOutButton";
 
 type MobileNavProps = {
   activePath?: string;
+  roleNames: string[];
 };
 
-export function MobileNav({ activePath }: MobileNavProps) {
+export function MobileNav({ activePath, roleNames }: MobileNavProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const visibleNavItems = getVisibleNavItems(roleNames);
 
   return (
     <div className="lg:hidden">
@@ -30,7 +32,7 @@ export function MobileNav({ activePath }: MobileNavProps) {
           className="absolute left-4 right-4 top-full z-30 mt-3 rounded-[2rem] border border-[#E6EAF0] bg-white p-4 shadow-xl"
         >
           <div className="grid gap-2">
-            {navItems.map((item) => {
+            {visibleNavItems.map((item) => {
               const isActive = activePath === item.href;
 
               return (

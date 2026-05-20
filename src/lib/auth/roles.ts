@@ -9,6 +9,15 @@ export const ROLES = [
 
 export type Role = (typeof ROLES)[number];
 
+export const ROLE_PRIORITY: Role[] = [
+  "admin",
+  "doctor",
+  "nurse",
+  "pharmacist",
+  "caregiver",
+  "civilian",
+];
+
 export const ROLE_LABELS: Record<Role, string> = {
   civilian: "Civilian User",
   caregiver: "Caregiver",
@@ -29,7 +38,7 @@ export const ROLE_DESCRIPTIONS: Record<Role, string> = {
 
 export const LANDING_ROUTE_BY_ROLE: Record<Role, string> = {
   civilian: "/dashboard",
-  caregiver: "/dashboard",
+  caregiver: "/care-circle",
   nurse: "/clinical/patients",
   doctor: "/clinical/patients",
   pharmacist: "/clinical/reviews",
@@ -45,4 +54,19 @@ export function getPreferredLandingRoute(roles: Role[]) {
   if (roles.length === 1) return LANDING_ROUTE_BY_ROLE[roles[0]];
 
   return "/role-select";
+}
+
+export function getHighestPriorityRole(roles: Role[]): Role | null {
+  return ROLE_PRIORITY.find((role) => roles.includes(role)) ?? null;
+}
+
+export function getEffectiveRole(
+  roles: Role[],
+  preferredRole?: string | null
+): Role | null {
+  if (preferredRole && isRole(preferredRole) && roles.includes(preferredRole)) {
+    return preferredRole;
+  }
+
+  return getHighestPriorityRole(roles);
 }

@@ -200,8 +200,8 @@ export default async function CareCirclePage({ searchParams }: PageProps) {
 
   return (
     <AppShell
-      title="Care Circle Sharing"
-      subtitle="Share medication visibility with trusted caregivers and manage their access."
+      title="Caregiver Dashboard"
+      subtitle="Review shared care access, medication visibility, and care circle permissions."
       activePath="/care-circle"
     >
       {params.message ? (

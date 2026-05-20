@@ -67,6 +67,7 @@ export default function RoleSelectPage() {
   }, [router]);
 
   function chooseRole(role: Role) {
+    document.cookie = `medaware_active_role=${role}; path=/; max-age=2592000; samesite=lax`;
     router.push(LANDING_ROUTE_BY_ROLE[role]);
   }
 

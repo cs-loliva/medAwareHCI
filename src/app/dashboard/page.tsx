@@ -280,7 +280,7 @@ export default async function DashboardPage({ searchParams }: PageProps) {
 
   return (
     <AppShell
-      title="Civilian Medication Dashboard"
+      title="Civilian Dashboard"
       subtitle="Track your next dose, adherence status, and active safety alerts."
       activePath="/dashboard"
     >
