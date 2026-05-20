@@ -6,9 +6,10 @@ type TopBarProps = {
   title: string;
   subtitle?: string;
   activePath?: string;
+  roleNames: string[];
 };
 
-export function TopBar({ title, subtitle, activePath }: TopBarProps) {
+export function TopBar({ title, subtitle, activePath, roleNames }: TopBarProps) {
   return (
     <header className="sticky top-0 z-10 border-b border-[#E6EAF0] bg-[#F6F8FB]/90 px-4 py-4 backdrop-blur print:hidden sm:px-6 sm:py-5">
       <div className="relative flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
@@ -27,7 +28,7 @@ export function TopBar({ title, subtitle, activePath }: TopBarProps) {
             ) : null}
           </div>
 
-          <MobileNav activePath={activePath} />
+          <MobileNav activePath={activePath} roleNames={roleNames} />
         </div>
 
         <div className="hidden flex-wrap items-center gap-3 lg:flex">

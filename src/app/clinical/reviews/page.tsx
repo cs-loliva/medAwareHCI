@@ -286,8 +286,8 @@ export default async function ReviewQueuePage({ searchParams }: PageProps) {
 
   return (
     <AppShell
-      title="Pharmacist Review Queue"
-      subtitle="Review medications escalated from clinical danger alerts and safety checks."
+      title="Pharmacist Dashboard"
+      subtitle="Review escalated medications, approve safe therapies, and flag unsafe orders."
       activePath="/clinical/reviews"
     >
       {params.message ? (

@@ -2,8 +2,10 @@ import { AppShell } from "@/components/layout/AppShell";
 import { Badge } from "@/components/ui/Badge";
 import { Card } from "@/components/ui/Card";
 import { createClient } from "@/lib/supabase/server";
+import { getEffectiveRole, isRole, type Role } from "@/lib/auth/roles";
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { cookies } from "next/headers";
 
 type Patient = {
   id: string;
@@ -134,6 +136,27 @@ export default async function PatientBoardPage() {
     redirect("/login");
   }
 
+  const { data: roleRows } = await supabase
+    .from("user_roles")
+    .select("roles(name)")
+    .eq("user_id", user.id);
+
+  const roles = (roleRows ?? [])
+    .flatMap((row: { roles: { name: string } | { name: string }[] | null }) => {
+      const relatedRole = row.roles;
+      if (Array.isArray(relatedRole)) return relatedRole.map((role) => role?.name);
+      return relatedRole?.name;
+    })
+    .filter((role): role is Role => Boolean(role && isRole(role)));
+
+  const activeRole = (await cookies()).get("medaware_active_role")?.value;
+  const effectiveRole = getEffectiveRole(roles, activeRole);
+  const dashboardTitle = effectiveRole === "doctor" ? "Doctor Dashboard" : "Nurse Dashboard";
+  const dashboardSubtitle =
+    effectiveRole === "doctor"
+      ? "Review patient medication plans, clinical alerts, and discharge workflows."
+      : "Review assigned patients, medication schedules, and active clinical alerts.";
+
   const [
     patientsResponse,
     alertsResponse,
@@ -181,8 +204,8 @@ export default async function PatientBoardPage() {
 
   return (
     <AppShell
-      title="Hospital Patient Board"
-      subtitle="Prioritize patients by room, diagnosis, medication risk, and next medication action."
+      title={dashboardTitle}
+      subtitle={dashboardSubtitle}
       activePath="/clinical/patients"
     >
       <div className="grid gap-5 md:grid-cols-3">

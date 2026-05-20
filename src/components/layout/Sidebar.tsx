@@ -1,11 +1,14 @@
 import Link from "next/link";
-import { navItems } from "./navItems";
+import { getVisibleNavItems } from "./navItems";
 
 type SidebarProps = {
   activePath?: string;
+  roleNames: string[];
 };
 
-export function Sidebar({ activePath }: SidebarProps) {
+export function Sidebar({ activePath, roleNames }: SidebarProps) {
+  const visibleNavItems = getVisibleNavItems(roleNames);
+
   return (
     <aside className="hidden min-h-screen w-72 border-r border-[#E6EAF0] bg-white px-5 py-6 lg:block print:hidden">
       <Link href="/" className="flex items-center gap-3">
@@ -22,7 +25,7 @@ export function Sidebar({ activePath }: SidebarProps) {
       </Link>
 
       <nav className="mt-10 space-y-2">
-        {navItems.map((item) => {
+        {visibleNavItems.map((item) => {
           const isActive = activePath === item.href;
 
           return (
