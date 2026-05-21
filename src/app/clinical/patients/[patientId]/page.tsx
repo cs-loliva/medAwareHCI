@@ -1,6 +1,7 @@
 import { AppShell } from "@/components/layout/AppShell";
 import { Badge } from "@/components/ui/Badge";
 import { Card } from "@/components/ui/Card";
+import { FlashMessage } from "@/components/ui/FlashMessage";
 import { AdministerMedicationForm } from "@/components/features/clinical/AdministerMedicationForm";
 import { createClient } from "@/lib/supabase/server";
 import { canAccessPatient, getCurrentUserWithRoles } from "@/lib/auth/clinicalAccess";
@@ -266,23 +267,11 @@ export default async function PatientMedicationTrackerPage({
       } • ${patient.primary_diagnosis ?? "No diagnosis listed"}`}
       activePath="/clinical/patients"
     >
-      {query.message ? (
-        <Card className="mb-5 border-[#12B76A]/40 bg-[#EAFBF3]">
-          <Badge variant="success">Success</Badge>
-          <p className="mt-3 text-sm font-bold text-[#101828]">
-            {query.message}
-          </p>
-        </Card>
-      ) : null}
-
-      {query.error ? (
-        <Card className="mb-5 border-[#FF3F4D]/40 bg-[#FFF6F7]">
-          <Badge variant="danger">Error</Badge>
-          <p className="mt-3 text-sm font-bold text-[#FF3F4D]">
-            {query.error}
-          </p>
-        </Card>
-      ) : null}
+      <FlashMessage
+        className="mb-5"
+        message={query.message}
+        error={query.error}
+      />
 
       <div className="grid gap-5 lg:grid-cols-3">
         <Card>

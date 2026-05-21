@@ -1,6 +1,7 @@
 import { AppShell } from "@/components/layout/AppShell";
 import { Badge } from "@/components/ui/Badge";
 import { Card } from "@/components/ui/Card";
+import { FlashMessage } from "@/components/ui/FlashMessage";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
@@ -238,23 +239,11 @@ export default async function AdminPage({ searchParams }: PageProps) {
       subtitle="Manage roles, audit logs, and system access."
       activePath="/admin"
     >
-      {params.message ? (
-        <Card className="mb-5 border-[#12B76A]/40 bg-[#EAFBF3]">
-          <Badge variant="success">Success</Badge>
-          <p className="mt-3 text-sm font-bold text-[#101828]">
-            {params.message}
-          </p>
-        </Card>
-      ) : null}
-
-      {params.error ? (
-        <Card className="mb-5 border-[#FF3F4D]/40 bg-[#FFF6F7]">
-          <Badge variant="danger">Error</Badge>
-          <p className="mt-3 text-sm font-bold text-[#FF3F4D]">
-            {params.error}
-          </p>
-        </Card>
-      ) : null}
+      <FlashMessage
+        className="mb-5"
+        message={params.message}
+        error={params.error}
+      />
 
       {profilesResponse.error ||
       rolesResponse.error ||
