@@ -235,7 +235,7 @@ export default async function PatientBoardPage() {
       medicationsResponse.error ||
       schedulesResponse.error ? (
         <Card className="mt-5">
-          <Badge variant="danger">Load warning</Badge>
+          <Badge variant="danger">Could not load this section</Badge>
           <p className="mt-3 text-sm leading-6 text-[#667085]">
             {patientsResponse.error?.message ??
               alertsResponse.error?.message ??

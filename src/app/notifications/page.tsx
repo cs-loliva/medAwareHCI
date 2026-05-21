@@ -147,13 +147,21 @@ export default async function NotificationsPage() {
               </form>
             ) : null}
           </div>
-          {error ? <p className="text-sm text-rose-700">Unable to load notifications: {error.message}</p> : null}
+          {error ? (
+            <Card>
+              <Badge variant="danger">Could not load this section</Badge>
+              <p className="mt-3 text-sm text-[#667085]">{error.message}</p>
+              <Link href="/dashboard" className="mt-3 inline-block text-sm font-black text-[#344054] underline">
+                Back to dashboard
+              </Link>
+            </Card>
+          ) : null}
         </Card>
 
         {notifications.length === 0 ? (
           <Card>
             <p className="text-sm text-slate-600">
-              No notifications yet. Medication reminders, care circle updates, and safety messages will appear here.
+              No notifications yet. Medication reminders, care circle updates, and safety messages will appear here. You can return to the dashboard and continue setup.
             </p>
           </Card>
         ) : (

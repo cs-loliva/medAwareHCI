@@ -54,7 +54,7 @@ export default async function MedicationSafetyEvidencePage({ params }: PageProps
         <div className="mt-6">
           <h2 className="text-xl font-black">Label evidence</h2>
           {evidence.length === 0 ? (
-            <p className="mt-2 rounded-2xl bg-[#F6F8FB] p-4 text-sm text-[#667085]">No external label evidence is currently stored for this medication.</p>
+            <p className="mt-2 rounded-2xl bg-[#F6F8FB] p-4 text-sm text-[#667085]">No public label evidence is stored for this medication yet.</p>
           ) : (
             <div className="mt-3 space-y-3">
               {evidence.map((item, index) => (
