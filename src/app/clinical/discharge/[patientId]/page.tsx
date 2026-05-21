@@ -2,6 +2,7 @@ import { PrintButton } from "@/components/features/clinical/PrintButton";
 import { AppShell } from "@/components/layout/AppShell";
 import { Badge } from "@/components/ui/Badge";
 import { Card } from "@/components/ui/Card";
+import { FlashMessage } from "@/components/ui/FlashMessage";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import { canAccessPatient, getCurrentUserWithRoles } from "@/lib/auth/clinicalAccess";
@@ -213,23 +214,11 @@ export default async function DischargeInstructionsPage({
       }`}
       activePath="/clinical/patients"
     >
-      {query.message ? (
-        <Card className="mb-5 border-[#12B76A]/40 bg-[#EAFBF3] print:hidden">
-          <Badge variant="success">Success</Badge>
-          <p className="mt-3 text-sm font-bold text-[#101828]">
-            {query.message}
-          </p>
-        </Card>
-      ) : null}
-
-      {query.error ? (
-        <Card className="mb-5 border-[#FF3F4D]/40 bg-[#FFF6F7] print:hidden">
-          <Badge variant="danger">Error</Badge>
-          <p className="mt-3 text-sm font-bold text-[#FF3F4D]">
-            {query.error}
-          </p>
-        </Card>
-      ) : null}
+      <FlashMessage
+        className="mb-5 print:hidden"
+        message={query.message}
+        error={query.error}
+      />
 
       <div className="mb-5 flex flex-col gap-3 print:hidden md:flex-row md:items-center md:justify-between">
         <div className="flex flex-wrap gap-3">

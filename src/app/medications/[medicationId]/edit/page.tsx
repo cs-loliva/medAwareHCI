@@ -1,6 +1,7 @@
 import { AppShell } from "@/components/layout/AppShell";
 import { Badge } from "@/components/ui/Badge";
 import { Card } from "@/components/ui/Card";
+import { FlashMessage } from "@/components/ui/FlashMessage";
 import { createClient } from "@/lib/supabase/server";
 import { getLabelSafetyEvidence } from "@/lib/medications/openfda";
 import { validateDoseInput, validateMedicationName } from "@/lib/medications/validation";
@@ -191,12 +192,7 @@ export default async function EditMedicationPage({
       subtitle="Update your tracker details and schedule time."
       activePath="/dashboard"
     >
-      {query.error ? (
-        <Card className="mb-5 border-[#FF3F4D]/40 bg-[#FFF6F7]">
-          <Badge variant="danger">Error</Badge>
-          <p className="mt-3 text-sm font-bold text-[#FF3F4D]">{query.error}</p>
-        </Card>
-      ) : null}
+      <FlashMessage className="mb-5" error={query.error} />
 
       <Card>
         <div className="mb-6 rounded-2xl border border-[#F9D7DA] bg-[#FFF6F7] p-4">

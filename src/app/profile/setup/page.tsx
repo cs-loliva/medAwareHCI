@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { FlashMessage } from "@/components/ui/FlashMessage";
 import { redirect } from "next/navigation";
 
 type ProfileRow = {
@@ -122,12 +123,7 @@ export default async function ProfileSetupPage({ searchParams }: ProfileSetupPag
       <p className="mt-3 rounded-xl bg-[#FFF6F7] p-4 text-sm text-[#667085]">
         MedAware is an academic prototype. Profile information is used for demo care coordination only and does not create a real clinical account.
       </p>
-      {errorMessage ? (
-        <div className="mt-4 rounded-xl border border-[#F04438] bg-[#FEE4E2] p-4 text-sm text-[#B42318]">
-          <p className="font-bold">Unable to save profile</p>
-          <p className="mt-1">{errorMessage}</p>
-        </div>
-      ) : null}
+      <FlashMessage className="mt-4" error={errorMessage} />
       <form action={saveProfile} className="mt-6 space-y-4 rounded-2xl border border-[#E6EAF0] p-6">
         <label className="block">
           <span className="text-sm font-bold">First name</span>
