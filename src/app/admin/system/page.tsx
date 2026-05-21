@@ -302,12 +302,20 @@ export default async function AdminSystemPage() {
                 </p>
               </div>
 
-              <Link
-                href="/admin"
-                className="rounded-2xl bg-[#101828] px-5 py-3 text-sm font-black text-white"
-              >
-                Back to admin
-              </Link>
+              <div className="flex flex-wrap gap-3">
+                <Link
+                  href="/admin/qa"
+                  className="rounded-2xl border border-[#D0D5DD] bg-white px-5 py-3 text-sm font-black text-[#101828]"
+                >
+                  Open final QA checklist
+                </Link>
+                <Link
+                  href="/admin"
+                  className="rounded-2xl bg-[#101828] px-5 py-3 text-sm font-black text-white"
+                >
+                  Back to admin
+                </Link>
+              </div>
             </div>
 
             <div className="mt-6 grid gap-4 md:grid-cols-2">
