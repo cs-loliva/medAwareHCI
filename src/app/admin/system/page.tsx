@@ -308,6 +308,13 @@ export default async function AdminSystemPage() {
               >
                 Back to admin
               </Link>
+
+              <Link
+                href="/admin/schema"
+                className="rounded-2xl border border-[#101828] px-5 py-3 text-sm font-black text-[#101828]"
+              >
+                Open schema health check
+              </Link>
             </div>
 
             <div className="mt-6 grid gap-4 md:grid-cols-2">

@@ -909,3 +909,16 @@ Completed modules include:
 - System readiness overview
 - Widget mockups
 - Mobile responsive navigation
+
+## Supabase Migration Runbook
+
+- GitHub migration files are not automatically applied to Supabase unless a migration pipeline is configured.
+- After pulling or merging migration changes, run the new SQL manually in Supabase SQL Editor.
+- After schema changes, run:
+
+```sql
+select pg_notify('pgrst', 'reload schema');
+```
+
+- Check `/admin/schema` after deployment.
+- If medication creation fails with schema cache errors, verify the medication metadata columns (`rxcui`, `normalized_name`, `normalization_source`, `normalization_confidence`, `safety_evidence`, `safety_checked_at`).

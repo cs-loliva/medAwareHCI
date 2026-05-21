@@ -44,6 +44,10 @@ export function getRequiredRolesForPath(pathname: string): Role[] {
     return ["doctor", "nurse", "admin"];
   }
 
+  if (pathname.startsWith("/admin/schema")) {
+    return ["admin"];
+  }
+
   if (pathname.startsWith("/admin")) {
     return ["admin"];
   }
