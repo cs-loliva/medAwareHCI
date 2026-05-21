@@ -14,6 +14,7 @@ export default function UnauthorizedPage() {
 
         <p className="mt-4 text-sm leading-6 text-[#667085]">
           Your current role does not have permission to open this MedAware view.
+          You may be signed in with a role that does not have access to this workspace.
           Return to role selection or sign in with another account.
         </p>
 

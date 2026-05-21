@@ -126,8 +126,14 @@ export async function proxy(request: NextRequest) {
 
   const roles = await getUserRoles(supabase, user.id);
 
-  if (pathname === "/role-select" && roles.length === 1) {
-    return redirectTo(request, getPreferredLandingRoute(roles));
+  if (pathname === "/role-select") {
+    if (roles.length === 0) {
+      return redirectTo(request, "/unauthorized");
+    }
+
+    if (roles.length === 1) {
+      return redirectTo(request, getPreferredLandingRoute(roles));
+    }
   }
 
   if (!canAccessPath(pathname, roles)) {

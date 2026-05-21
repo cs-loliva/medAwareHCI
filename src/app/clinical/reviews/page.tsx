@@ -86,10 +86,33 @@ async function getCurrentUser() {
   return user;
 }
 
+
+async function assertPharmacistOrAdmin() {
+  const user = await getCurrentUser();
+  const supabase = await createClient();
+  const { data: roleRows } = await supabase
+    .from("user_roles")
+    .select("roles(name)")
+    .eq("user_id", user.id);
+
+  const roleNames = (roleRows ?? [])
+    .flatMap((row) => {
+      const relatedRole = row.roles as { name: string } | { name: string }[] | null;
+      if (Array.isArray(relatedRole)) return relatedRole.map((role) => role.name);
+      return relatedRole?.name ? [relatedRole.name] : [];
+    });
+
+  const allowed = roleNames.includes("pharmacist") || roleNames.includes("admin");
+  if (!allowed) {
+    redirect("/unauthorized");
+  }
+
+  return user;
+}
 async function approveMedication(formData: FormData) {
   "use server";
 
-  const user = await getCurrentUser();
+  const user = await assertPharmacistOrAdmin();
   const admin = createAdminClient();
 
   const reviewId = String(formData.get("reviewId") ?? "");
@@ -151,7 +174,7 @@ async function approveMedication(formData: FormData) {
 async function flagMedicationUnsafe(formData: FormData) {
   "use server";
 
-  const user = await getCurrentUser();
+  const user = await assertPharmacistOrAdmin();
   const admin = createAdminClient();
 
   const reviewId = String(formData.get("reviewId") ?? "");
@@ -230,7 +253,7 @@ async function flagMedicationUnsafe(formData: FormData) {
 }
 
 export default async function ReviewQueuePage({ searchParams }: PageProps) {
-  await getCurrentUser();
+  await assertPharmacistOrAdmin();
 
   const params = searchParams ? await searchParams : {};
   const admin = createAdminClient();

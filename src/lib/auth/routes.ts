@@ -19,21 +19,24 @@ export function getRequiredRolesForPath(pathname: string): Role[] {
     pathname.startsWith("/care-circle") ||
     pathname.startsWith("/offline") ||
     pathname.startsWith("/settings") ||
-    pathname.startsWith("/notifications") ||
     pathname.startsWith("/widgets")
   ) {
     return ["civilian", "caregiver", "admin"];
+  }
+
+  if (pathname.startsWith("/notifications")) {
+    return ["civilian", "caregiver", "nurse", "doctor", "pharmacist", "admin"];
   }
 
   if (
     pathname.startsWith("/clinical/patients") ||
     pathname.startsWith("/clinical/alerts")
   ) {
-    return ["nurse", "doctor", "pharmacist", "admin"];
+    return ["nurse", "doctor", "admin"];
   }
 
   if (pathname.startsWith("/clinical/reviews")) {
-    return ["pharmacist", "doctor", "admin"];
+    return ["pharmacist", "admin"];
   }
 
   if (pathname.startsWith("/clinical/clinic")) {

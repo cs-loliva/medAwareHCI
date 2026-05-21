@@ -909,3 +909,14 @@ Completed modules include:
 - System readiness overview
 - Widget mockups
 - Mobile responsive navigation
+## Security and Access Control Checklist
+
+- **Public routes:** Keep `/`, `/login`, `/auth/callback`, and `/unauthorized` public. Enforce all other sensitive routes with server-side checks.
+- **Auth-only routes:** Require a signed-in user for profile, dashboard, medications, care circle, notifications, clinical, and admin workspaces.
+- **Role-only routes:** Resolve authorization from `public.roles` + `public.user_roles` only (never from `user_metadata`).
+- **Owner-scoped medication routes:** Ensure read/update/archive/restore actions on medications are always scoped by `user_id = auth.uid()` (or equivalent server-side owner checks).
+- **Care Circle shared access:** Allow `/care-circle/shared/[ownerId]` only with an active owner→caregiver relationship; deny direct URL access without membership.
+- **Clinical assignment enforcement:** Keep patient/alert/note/administration/discharge access restricted to admin or assigned clinical staff.
+- **Admin-only service role use:** Use `createAdminClient`/`SUPABASE_SERVICE_ROLE_KEY` only in server components, route handlers, or server actions.
+- **RLS policy review:** Keep RLS enabled on sensitive tables and ensure policies enforce owner or assignment scope for reads/writes.
+- **Google metadata not used for authorization:** OAuth profile metadata may prefill profile fields, but role authorization must come from database role tables.
