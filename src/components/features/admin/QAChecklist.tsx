@@ -18,11 +18,11 @@ const CHECKLIST_SECTIONS: ChecklistSection[] = [
   { id: "deployment", title: "Deployment/environment", badge: "I", items: ["Vercel production URL loads.", "NEXT_PUBLIC_SUPABASE_URL points to the correct Supabase project.", "Supabase Auth Site URL is correct.", "Supabase redirect URLs include localhost and Vercel.", "Medication metadata columns exist in Supabase.", "PostgREST schema cache was reloaded after migrations."] },
 ];
 const VERIFICATION_QUERIES = [
-  { label: "Verify medication metadata columns", sql: `select column_name, data_type\nfrom information_schema.columns\nwhere table_schema = 'public'\n  and table_name = 'medications'\n  and column_name in ('rxnorm_code', 'fda_rxcui', 'openfda_generic_name', 'openfda_brand_name')\norder by column_name;` },
+  { label: "Verify medication metadata columns", sql: `select column_name, data_type\nfrom information_schema.columns\nwhere table_schema = 'public'\n  and table_name = 'medications'\n  and column_name in ('rxcui', 'normalized_name', 'normalization_source', 'normalization_confidence', 'safety_evidence', 'safety_checked_at')\norder by column_name;` },
   { label: "Reload schema cache", sql: `select pg_notify('pgrst', 'reload schema');` },
   { label: "Check Google-created profiles", sql: `select p.id, p.email, p.full_name, p.created_at\nfrom public.profiles p\njoin auth.users u on u.id = p.id\nwhere u.raw_app_meta_data ->> 'provider' = 'google'\norder by p.created_at desc\nlimit 20;` },
   { label: "Check user roles for a user", sql: `select p.email, r.name as role\nfrom public.profiles p\njoin public.user_roles ur on ur.user_id = p.id\njoin public.roles r on r.id = ur.role_id\nwhere p.email = 'user@example.com'\norder by r.name;` },
-  { label: "Check schema health dependency used by /admin/schema", sql: `select *\nfrom public.schema_health_checks\nlimit 50;` },
+  { label: "Check schema health dependency used by /admin/schema", sql: `select *\nfrom public.get_schema_health()\norder by table_name, column_name;` },
 ];
 const QUICK_LINKS = ["/dashboard", "/medications/new", "/medications/interactions", "/notifications", "/care-circle", "/clinical/patients", "/clinical/reviews", "/admin", "/admin/system", "/admin/schema"];
 const STORAGE_KEY = "medaware-admin-qa-checklist-v1";

@@ -934,3 +934,18 @@ Completed modules include:
 - Test Google signup.
 - Test one demo account per role.
 - Test medication creation with a recognized RxNorm medication.
+
+
+## Supabase Migration Runbook
+
+- GitHub migration files are not automatically applied to Supabase unless a migration pipeline is configured.
+- After merging migration changes, run the new SQL manually in Supabase SQL Editor.
+- After schema changes, run:
+
+```sql
+select pg_notify('pgrst', 'reload schema');
+```
+
+- Check `/admin/schema` after deployment.
+- If medication creation fails with schema cache errors, verify medication metadata columns.
+- Confirm `/admin/qa` for final smoke testing.

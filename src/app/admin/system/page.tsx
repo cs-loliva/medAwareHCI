@@ -304,6 +304,12 @@ export default async function AdminSystemPage() {
 
               <div className="flex flex-wrap gap-3">
                 <Link
+                  href="/admin/schema"
+                  className="rounded-2xl border border-[#D0D5DD] bg-white px-5 py-3 text-sm font-black text-[#101828]"
+                >
+                  Open schema health check
+                </Link>
+                <Link
                   href="/admin/qa"
                   className="rounded-2xl border border-[#D0D5DD] bg-white px-5 py-3 text-sm font-black text-[#101828]"
                 >
