@@ -920,3 +920,17 @@ Completed modules include:
 - **Admin-only service role use:** Use `createAdminClient`/`SUPABASE_SERVICE_ROLE_KEY` only in server components, route handlers, or server actions.
 - **RLS policy review:** Keep RLS enabled on sensitive tables and ensure policies enforce owner or assignment scope for reads/writes.
 - **Google metadata not used for authorization:** OAuth profile metadata may prefill profile fields, but role authorization must come from database role tables.
+
+
+## Final QA Before Presentation
+
+- Run `npm run build` locally.
+- Confirm `git status` is clean before presenting or submitting.
+- Confirm the latest Vercel deployment succeeded.
+- Run Supabase migrations manually if needed.
+- Run `select pg_notify('pgrst', 'reload schema');` after schema changes.
+- Open `/admin/schema`.
+- Open `/admin/qa`.
+- Test Google signup.
+- Test one demo account per role.
+- Test medication creation with a recognized RxNorm medication.
