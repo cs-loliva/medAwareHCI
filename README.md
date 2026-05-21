@@ -144,6 +144,23 @@ The seed SQL file creates demo roles, profiles, medications, patients, alerts, r
 
 ---
 
+## Supabase Migration Runbook
+
+Run migrations in order whenever schema changes are introduced:
+
+```text
+1. supabase/migrations/001_initial_schema.sql
+2. supabase/migrations/002_rls_policies.sql
+3. supabase/migrations/003_profile_onboarding.sql
+4. supabase/migrations/004_medication_rxnorm_metadata.sql
+5. supabase/migrations/005_notifications_inbox.sql
+6. supabase/migrations/008_schema_health_check.sql
+```
+
+After migrations run, execute seed scripts and then verify `/admin/system` and `/admin/schema` as an admin user.
+
+---
+
 ## Demo Accounts
 
 All demo accounts use the password stored in:
