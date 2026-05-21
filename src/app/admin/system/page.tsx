@@ -244,6 +244,19 @@ export default async function AdminSystemPage() {
       subtitle="Inspect environment readiness, database health, safety queues, and audit activity."
       activePath="/admin/system"
     >
+      <Card className="mb-5">
+        <Badge variant="info">Schema diagnostics</Badge>
+        <p className="mt-3 text-sm text-[#667085]">
+          Validate Supabase schema policy coverage and migration readiness.
+        </p>
+        <Link
+          href="/admin/schema"
+          className="mt-4 inline-flex rounded-full bg-[#0b4a6f] px-4 py-2 text-sm font-semibold text-white hover:bg-[#08364f]"
+        >
+          Open schema health check
+        </Link>
+      </Card>
+
       <div className="grid gap-5 md:grid-cols-4">
         <Card>
           <Badge variant={missingEnvCount === 0 ? "success" : "danger"}>

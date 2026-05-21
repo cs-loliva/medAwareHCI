@@ -21,6 +21,7 @@ export const navItems = [
   { href: "/clinical/reviews", label: "Review Queue", roles: ["pharmacist", "admin"] },
   { href: "/admin", label: "Admin", roles: ["admin"] },
   { href: "/admin/system", label: "System Overview", roles: ["admin"] },
+  { href: "/admin/schema", label: "Schema Health", roles: ["admin"] },
   { href: "/role-select", label: "Switch Role", roles: ["civilian", "caregiver", "nurse", "doctor", "pharmacist", "admin"] },
 ] satisfies NavItem[];
 
