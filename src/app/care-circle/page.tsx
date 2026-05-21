@@ -224,8 +224,9 @@ export default async function CareCirclePage({ searchParams }: PageProps) {
 
       {error ? (
         <Card className="mb-5">
-          <Badge variant="danger">Error</Badge>
+          <Badge variant="danger">Could not load this section</Badge>
           <p className="mt-3 text-sm text-[#667085]">{error.message}</p>
+          <Link href="/dashboard" className="mt-3 inline-block text-sm font-black text-[#344054] underline">Back to dashboard</Link>
         </Card>
       ) : null}
 

@@ -328,7 +328,7 @@ export default async function DashboardPage({ searchParams }: PageProps) {
       alertsResponse.error ||
       logsResponse.error ? (
         <Card className="mb-5">
-          <Badge variant="danger">Load warning</Badge>
+          <Badge variant="danger">Could not load this section</Badge>
           <p className="mt-3 text-sm leading-6 text-[#667085]">
             {medicationsResponse.error?.message ??
               schedulesResponse.error?.message ??
